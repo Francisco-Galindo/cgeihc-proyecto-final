@@ -1,6 +1,6 @@
 /*
-Animación:
-Simple o básica:Por banderas y condicionales (más de 1 transformación geométrica se ve modificada)
+AnimaciÃ³n:
+Simple o bÃ¡sica:Por banderas y condicionales (mÃ¡s de 1 transformaciÃ³n geomÃ©trica se ve modificada)
 Compleja: Por medio de funciones y algoritmos.
 Textura Animada
 */
@@ -12,6 +12,8 @@ Textura Animada
 #include <cmath>
 #include <vector>
 #include <math.h>
+#include <stdlib.h>
+
 
 #include <glew.h>
 #include <glfw3.h>
@@ -29,121 +31,16 @@ Textura Animada
 #include"Model.h"
 #include "Skybox.h"
 
-//para iluminación
+//para iluminaciÃ³n
 #include "CommonValues.h"
 #include "DirectionalLight.h"
 #include "PointLight.h"
 #include "SpotLight.h"
 #include "Material.h"
+
 const float toRadians = 3.14159265f / 180.0f;
 
-
-GLuint torusVAO, torusVBO, torusEBO;
-unsigned int torusIndexCount = 0;
-
-void createTorus(float majorRadius, float minorRadius, int sectorCount, int sideCount)
-{
-    std::vector<GLfloat> vertexData;
-    std::vector<unsigned int> indices;
-
-    vertexData.clear();
-    indices.clear();
-
-    float sectorStep = 2.0f * (float)M_PI / sectorCount;
-    float sideStep = 2.0f * (float)M_PI / sideCount;
-
-    for (int i = 0; i <= sideCount; ++i) {
-        float sideAngle = i * sideStep;
-
-        for (int j = 0; j <= sectorCount; ++j) {
-            float sectorAngle = j * sectorStep;
-
-            float x = (majorRadius + minorRadius * cosf(sideAngle)) * cosf(sectorAngle);
-            float y = (majorRadius + minorRadius * cosf(sideAngle)) * sinf(sectorAngle);
-            float z = minorRadius * sinf(sideAngle);
-
-           
-            float u = (float)j / sectorCount;
-            float v = (float)i / sideCount;
-
-            float nx = -cosf(sideAngle) * cosf(sectorAngle);
-            float ny = -cosf(sideAngle) * sinf(sectorAngle);
-            float nz = -sinf(sideAngle);
-
-            float len = sqrtf(nx * nx + ny * ny + nz * nz);
-            nx /= len; ny /= len; nz /= len;
-
-            vertexData.insert(vertexData.end(), { x, y, z, u, v, nx, ny, nz });
-        }
-    }
-
-    for (int i = 0; i < sideCount; ++i) {
-        unsigned int k1 = i * (sectorCount + 1);
-        unsigned int k2 = k1 + sectorCount + 1;
-
-        for (int j = 0; j < sectorCount; ++j, ++k1, ++k2) {
-            indices.push_back(k1);
-            indices.push_back(k2);
-            indices.push_back(k1 + 1);
-
-            indices.push_back(k1 + 1);
-            indices.push_back(k2);
-            indices.push_back(k2 + 1);
-        }
-    }
-
-    glGenVertexArrays(1, &torusVAO);
-    glBindVertexArray(torusVAO);
-
-    glGenBuffers(1, &torusVBO);
-    glBindBuffer(GL_ARRAY_BUFFER, torusVBO);
-    glBufferData(GL_ARRAY_BUFFER, vertexData.size() * sizeof(GLfloat), vertexData.data(), GL_STATIC_DRAW);
-
-    glGenBuffers(1, &torusEBO);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, torusEBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), indices.data(), GL_STATIC_DRAW);
-
-    GLsizei stride = 8 * sizeof(GLfloat);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, stride, (GLvoid*)0);                // Posición
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, stride, (GLvoid*)(3 * sizeof(GLfloat))); // UV
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, stride, (GLvoid*)(5 * sizeof(GLfloat))); // Normal
-    glEnableVertexAttribArray(2);
-
-    glBindVertexArray(0);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-
-    // Guardar el número de índices para renderizar
-    torusIndexCount = (unsigned int)indices.size();
-}
-
-void renderTorus() {
-    glBindVertexArray(torusVAO);
-    glDrawElements(GL_TRIANGLES, (GLsizei)torusIndexCount, GL_UNSIGNED_INT, (GLvoid*)0);
-    glBindVertexArray(0);
-}
-
-
-void cleanupTorus() {
-    glDisableVertexAttribArray(0); // Posición
-    glDisableVertexAttribArray(1); // UV
-    glDisableVertexAttribArray(2); // Normal
-
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glDeleteBuffers(1, &torusVBO);
-
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-    glDeleteBuffers(1, &torusEBO);
-
-    glBindVertexArray(0);
-    glDeleteVertexArrays(1, &torusVAO);
-}
-
-
-
-//variables para animación
+//variables para animaciÃ³n
 float movCoche;
 float movOffset;
 float rotllanta;
@@ -156,6 +53,10 @@ float toffsetnumerov = 0.0f;
 float toffsetnumerocambiau = 0.0;
 float angulovaria = 0.0f;
 float dragonavance = 0.0f;
+float reproduciranimacion, habilitaranimacion, guardoFrame, reinicioFrame, 
+ciclo, ciclo2, ciclo3, ciclo4,ciclo5,ciclo6,ciclo7,ciclo8, contador = 0;
+int i, a=20;
+
 
 Window mainWindow;
 std::vector<Mesh*> meshList;
@@ -173,8 +74,13 @@ Texture NumerosTexture;
 Texture Numero1Texture;
 Texture Numero2Texture;
 Texture Degradado;
-
-
+Texture race;
+Texture bottom_Trunk;
+Texture coconut;
+Texture roca;
+Texture techo;
+Texture wall;
+Texture wood;
 
 Model Kitt_M;
 Model Llanta_M;
@@ -192,11 +98,23 @@ Model cajaFrente;
 Model constFrente;
 Model explanadaDer;
 Model esqDer;
+Model racecourse;
+Model palmera;
+Model coco;
+Model FrenteIzq;
+Model casaTux;
+Model smallCasaTux;
+Model ring;
+
 
 //materiales
 Material Material_brillante;
 Material Material_opaco;
 
+//archivos
+FILE* archivo;
+errno_t err;
+char linea[100];
 
 //Sphere cabeza = Sphere(0.5, 20, 20);
 GLfloat deltaTime = 0.0f;
@@ -216,7 +134,9 @@ static const char* vShader = "shaders/shader_light.vert";
 static const char* fShader = "shaders/shader_light.frag";
 
 
-//cálculo del promedio de las normales para sombreado de Phong
+void inputKeyframes(bool* keys);
+
+//cÃ¡lculo del promedio de las normales para sombreado de Phong
 void calcAverageNormals(unsigned int* indices, unsigned int indiceCount, GLfloat* vertices, unsigned int verticeCount,
     unsigned int vLength, unsigned int normalOffset)
 {
@@ -358,11 +278,11 @@ void CreateObjects()
 
     Mesh* obj6 = new Mesh();
     obj6->CreateMesh(scoreVertices, scoreIndices, 32, 6);
-    meshList.push_back(obj6); // todos los números
+    meshList.push_back(obj6); // todos los nÃºmeros
 
     Mesh* obj7 = new Mesh();
     obj7->CreateMesh(numeroVertices, numeroIndices, 32, 6);
-    meshList.push_back(obj7); // solo un número
+    meshList.push_back(obj7); // solo un nÃºmero
 
 }
 
@@ -374,8 +294,136 @@ void CreateShaders()
     shaderList.push_back(*shader1);
 }
 
+bool animacion = false;
 
 
+//NEW// Keyframes
+float posXcoco = -1.0, posYcoco = 10.0, posZcoco = 1.0;
+float	movCoco_x = 0.0f, movCoco_y = 0.0f;
+
+#define MAX_FRAMES 100 //Nï¿½mero de cuadros mï¿½ximos
+int i_max_steps = 20; //Nï¿½mero de pasos entre cuadros para interpolaciï¿½n, a mayor nï¿½mero , mï¿½s lento serï¿½ el movimiento
+int i_curr_steps = 0;
+typedef struct _frame
+{
+    //Variables para GUARDAR Key Frames
+    float movCoco_x;		//Variable para PosicionX
+    float movCoco_y;		//Variable para PosicionY
+    float movCoco_xInc;		//Variable para IncrementoX
+    float movCoco_yInc;		//Variable para IncrementoY
+}FRAME;
+
+FRAME KeyFrame[MAX_FRAMES];
+int FrameIndex = 6;			//El nï¿½mero de cuadros guardados actualmente desde 0 para no sobreescribir
+bool play = false;
+int playIndex = 0;
+
+void saveFrame(void) //tecla L
+{
+
+    printf("frameindex %d\n", FrameIndex);
+
+
+    KeyFrame[FrameIndex].movCoco_x = movCoco_x;
+    KeyFrame[FrameIndex].movCoco_y = movCoco_y;
+    //Se agregan nuevas lï¿½neas para guardar mï¿½s variables si es necesario
+
+    //no volatil,se requiere agregar una forma de escribir a un archivo para guardar los frames
+    FrameIndex++;
+
+    err = fopen_s(&archivo, "datos.txt", "a");
+    if (err != 0 || archivo == NULL) {
+        printf("Error al abrir el archivo.\n");
+        exit(EXIT_FAILURE);
+    }
+    fprintf(archivo, "%f\n", movCoco_x);
+    fprintf(archivo, "%f\n", movCoco_y);
+
+    fclose(archivo);
+
+}
+
+void readFile(void) {
+    err = fopen_s(&archivo, "datos.txt", "r");
+    if (err != 0 || archivo == NULL) {
+        printf("Error al abrir el archivo.\n");
+        return; 
+    }
+
+    // Reiniciamos FrameIndex para cargar la animaciÃ³n desde cero
+    FrameIndex = 0;
+    float x, y;
+
+    while (fscanf_s(archivo, "%f\n%f", &x, &y) == 2)
+    {
+        if (FrameIndex >= MAX_FRAMES) {
+            printf("Se alcanzÃ³ el mÃ¡ximo de frames (%d).\n", MAX_FRAMES);
+            break; // Evitar que se desborde el arreglo
+        }
+
+        // Guardamos los valores en el ARREGLO, no en las variables globales
+        KeyFrame[FrameIndex].movCoco_x = x;
+        KeyFrame[FrameIndex].movCoco_y = y;
+
+        printf("LeÃ­do Frame %d: x=%.1f, y=%.1f, g=%.1f\n", FrameIndex, x, y);
+
+        FrameIndex++; // Incrementamos el Ã­ndice de frames leÃ­dos
+    }
+
+    fclose(archivo);
+    printf("Lectura de archivo completa. Total de frames cargados: %d\n", FrameIndex);
+
+}
+
+void resetElements(void) //Tecla 0
+{
+
+    movCoco_x = KeyFrame[0].movCoco_x;
+    movCoco_y = KeyFrame[0].movCoco_y;
+}
+
+void interpolation(void)
+{
+    KeyFrame[playIndex].movCoco_xInc = (KeyFrame[playIndex + 1].movCoco_x - KeyFrame[playIndex].movCoco_x) / i_max_steps;
+    KeyFrame[playIndex].movCoco_yInc = (KeyFrame[playIndex + 1].movCoco_y - KeyFrame[playIndex].movCoco_y) / i_max_steps;
+
+}
+
+
+void animate(void)
+{
+    //Movimiento del objeto con barra espaciadora
+    if (play)
+    {
+        if (i_curr_steps >= i_max_steps) //fin de animaciï¿½n entre frames?
+        {
+            playIndex++;
+            printf("playindex : %d\n", playIndex);
+            if (playIndex > FrameIndex - 2)	//Fin de toda la animaciï¿½n con ï¿½ltimo frame?
+            {
+                printf("Frame index= %d\n", FrameIndex);
+                printf("termino la animacion\n");
+                playIndex = 0;
+                play = false;
+            }
+            else //Interpolaciï¿½n del prï¿½ximo cuadro
+            {
+
+                i_curr_steps = 0; //Resetea contador
+                //Interpolar
+                interpolation();
+            }
+        }
+        else
+        {
+            //Dibujar Animaciï¿½n
+            movCoco_x += KeyFrame[playIndex].movCoco_xInc;
+            movCoco_y += KeyFrame[playIndex].movCoco_yInc;
+            i_curr_steps++;
+        }
+
+    }
+}
 
 int main()
 {
@@ -407,7 +455,20 @@ int main()
     Numero2Texture.LoadTextureA();
     Degradado = Texture("Textures/degradado.png");
     Degradado.LoadTextureA();
-
+    race = Texture("Textures/racecourse.png");
+    race.LoadTextureA();
+    bottom_Trunk = Texture("Textures/Bottom_Trunk.bmp");
+    bottom_Trunk.LoadTextureA();
+    coconut = Texture("Textures/Coconut_01.png");
+    coconut.LoadTextureA();
+    roca = Texture("Textures/roca.png");
+    roca.LoadTextureA();
+    techo = Texture("Textures/roof.png");
+    techo.LoadTextureA();
+    wood = Texture("Textures/oldWood.png");
+    wood.LoadTextureA();
+    wall = Texture("Textures/wall.png");
+    wall.LoadTextureA();
 
     Kitt_M = Model();
     Kitt_M.LoadModel("Models/kitt_optimizado.obj");
@@ -418,26 +479,41 @@ int main()
     castillo = Model();
     castillo.LoadModel("Models/castillo.obj");
     constMedio = Model();
-    constMedio.LoadModel("Models/constMedio.obj");
+    constMedio.LoadModel("Models/constCentro.obj");
     constMedioChiquito = Model();
-    constMedioChiquito.LoadModel("Models/constMedioChiquito.obj");
+    constMedioChiquito.LoadModel("Models/constCentroTecho.obj");
     esqIzq = Model();
     esqIzq.LoadModel("Models/esqIzq.obj");
     casitaIzq = Model();
-    casitaIzq.LoadModel("Models/casitaIzq.obj");
+    casitaIzq.LoadModel("Models/casaDer.obj");
     ruinasIzq = Model();
-    ruinasIzq.LoadModel("Models/ruinasIzq.obj");
+    ruinasIzq.LoadModel("Models/muroDer.obj");
     esqIzqFrente = Model();
-    esqIzqFrente.LoadModel("Models/esqIzqFrente.obj");
+    esqIzqFrente.LoadModel("Models/muroDerFrente.obj");
     cajaFrente = Model();
     cajaFrente.LoadModel("Models/cajaFrente.obj");
     constFrente = Model();
     constFrente.LoadModel("Models/constFrente.obj");
     explanadaDer = Model();
-    explanadaDer.LoadModel("Models/explanadaDer.obj");
+    explanadaDer.LoadModel("Models/planoIzq.obj");
+    FrenteIzq = Model();
+    FrenteIzq.LoadModel("Models/frenteIzq.obj");
     esqDer = Model();
     esqDer.LoadModel("Models/esqDer.obj");
+    racecourse = Model();
+    racecourse.LoadModel("Models/racecourse.obj");
+    palmera = Model();
+    palmera.LoadModel("Models/palmera.obj");
+    coco = Model();
+    coco.LoadModel("Models/coco.obj");
+    casaTux = Model();
+    casaTux.LoadModel("Models/casaTux.obj");
+    ring = Model();
+    ring.LoadModel("Models/ring_lucha_libre.obj");
 
+
+    smallCasaTux = Model();
+    smallCasaTux.LoadModel("Models/smallCasaTux.obj");
 
     std::vector<std::string> skyboxFaces;
     skyboxFaces.push_back("Textures/Skybox/cupertin-lake_rt.tga");
@@ -453,13 +529,13 @@ int main()
     Material_opaco = Material(0.3f, 4);
 
 
-    //luz direccional, sólo 1 y siempre debe de existir
+    //luz direccional, sÃ³lo 1 y siempre debe de existir
     mainLight = DirectionalLight(1.0f, 1.0f, 1.0f,
-        0.3f, 0.3f,
+        0.8f, 0.8f,
         0.0f, 0.0f, -1.0f);
     //contador de luces puntuales
     unsigned int pointLightCount = 0;
-    //Declaración de primer luz puntual
+    //DeclaraciÃ³n de primer luz puntual
     pointLights[0] = PointLight(1.0f, 0.0f, 0.0f,
         0.0f, 1.0f,
         0.0f, 2.5f, 1.5f,
@@ -504,9 +580,21 @@ int main()
     glm::vec3 color = glm::vec3(1.0f, 1.0f, 1.0f);
     glm::vec2 toffset = glm::vec2(0.0f, 0.0f);
 
+    glm::vec3 poscoco = glm::vec3(0.0f, 0.0f, 0.0f);
+
+    glm::vec3 arbol[20] = { glm::vec3(-2.0f, 0.0f, -5.0f), glm::vec3(1.0f, 0.0f, -5.0f), glm::vec3(0.0f, 0.0f, -5.0f),
+glm::vec3(-1.0f, 0.0f, -5.0f), glm::vec3(-4.0f, 0.0f, -5.0f), glm::vec3(4.0f, 0.0f, -5.0f), glm::vec3(-3.0f, 0.0f, -5.0f),
+glm::vec3(0.0f, 0.0f, -5.0f), glm::vec3(3.0f, 0.0f, -5.0f), glm::vec3(-5.0f, 0.0f, -5.0f), glm::vec3(-1.0f, 0.0f, -5.0f),
+glm::vec3(5.0f, 0.0f, -5.0f), glm::vec3(2.0f, 0.0f, -5.0f), glm::vec3(-3.0f, 0.0f, -5.0f), glm::vec3(1.0f, 0.0f, -5.0f),
+glm::vec3(-1.0f, 0.0f, -5.0f), glm::vec3(-5.0f, 0.0f, -5.0f), glm::vec3(0.0f, 0.0f, -5.0f), glm::vec3(-3.0f, 0.0f, -5.0f)};
+    glm::vec3 arbol1[20];
+
     ////Loop mientras no se cierra la ventana
 
-    createTorus(1.0f, 0.5f, 10, 10);
+    printf("\nTeclas para uso de Keyframes:\n1.-Presionar barra espaciadora para reproducir animacion.\n2.-Presionar 0 para volver a habilitar reproduccion de la animacion\n");
+    printf("3.-Presiona L para guardar frame\n4.-Presiona P para habilitar guardar nuevo frame\n5.-Presiona 1 para mover en X+\n6.-Presiona 2 para habilitar mover en X+\n");
+    printf("7.-Presiona 3 para mover en X-\n8.-Presiona 4 para habilitar mover en X-\n,9.-Presiona 5 para mover en Y+\n10.-Presiona 6 para habilitar mover en Y+\n");
+    printf("11.-Presiona 7 para mover en Y-\n12.-Presiona 8 para habilitar mover en Y-\n");
 
     while (!mainWindow.getShouldClose())
     {
@@ -530,6 +618,9 @@ int main()
         camera.keyControl(mainWindow.getsKeys(), deltaTime);
         camera.mouseControl(mainWindow.getXChange(), mainWindow.getYChange());
 
+        inputKeyframes(mainWindow.getsKeys());
+        animate();
+
         // Clear the window
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -542,7 +633,7 @@ int main()
         uniformColor = shaderList[0].getColorLocation();
         uniformTextureOffset = shaderList[0].getOffsetLocation(); // para la textura con movimiento
 
-        //información en el shader de intensidad especular y brillo
+        //informaciÃ³n en el shader de intensidad especular y brillo
         uniformSpecularIntensity = shaderList[0].GetSpecularIntensityLocation();
         uniformShininess = shaderList[0].GetShininessLocation();
 
@@ -550,12 +641,12 @@ int main()
         glUniformMatrix4fv(uniformView, 1, GL_FALSE, glm::value_ptr(camera.calculateViewMatrix()));
         glUniform3f(uniformEyePosition, camera.getCameraPosition().x, camera.getCameraPosition().y, camera.getCameraPosition().z);
 
-        // luz ligada a la cámara de tipo flash
+        // luz ligada a la cÃ¡mara de tipo flash
         lowerLight = camera.getCameraPosition();
         lowerLight.y -= 0.3f;
         spotLights[0].SetFlash(lowerLight, camera.getCameraDirection());
 
-        //información al shader de fuentes de iluminación
+        //informaciÃ³n al shader de fuentes de iluminaciÃ³n
         shaderList[0].SetDirectionalLight(&mainLight);
         shaderList[0].SetPointLights(pointLights, pointLightCount);
         shaderList[0].SetSpotLights(spotLights, spotLightCount);
@@ -590,79 +681,159 @@ int main()
         color = glm::vec3(0.5f, 0.5f, 0.5f);
         glUniform3fv(uniformColor, 1, glm::value_ptr(color));
 
-        Degradado.UseTexture();
+        
+        model = glm::mat4(1.0);
+        model = glm::translate(model, glm::vec3(-170.0f, -5.0f, 0.0f));
+        model = glm::rotate(model, 30 * toRadians, glm::vec3(0.0f, 1.0f, 0.0f));
+        model = glm::scale(model, glm::vec3(0.4f, 0.4f, 0.4f));
+        glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+        techo.LoadTextureA();
+        wood.LoadTextureA();
+        wall.LoadTextureA();
+        casaTux.RenderModel();
+        
+        model = glm::translate(model, glm::vec3(-40.0, -4.0f, 60.0f));;
+        glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+        techo.LoadTextureA();
+        wood.LoadTextureA();
+        wall.LoadTextureA();
+        smallCasaTux.RenderModel();
+
+        model = glm::translate(model, glm::vec3(-60.0, 0.0f, 0.0f));;
+        glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+        techo.LoadTextureA();
+        wood.LoadTextureA();
+        wall.LoadTextureA();
+        smallCasaTux.RenderModel();
 
         model = glm::mat4(1.0);
-        model = glm::translate(model, glm::vec3(0.0f, 0.5f, 0.0f));
+        model = glm::translate(model, glm::vec3(152.0f, -2.0f, 100.0f));
+        glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+        bottom_Trunk.UseTexture();
+        palmera.RenderModel();
+
+
+        for (i = 0; i < 20; i++) {
+            model = glm::translate(model, arbol[i]);
+            glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+            bottom_Trunk.UseTexture();
+            palmera.RenderModel();
+
+        }
+
+
+        model = glm::mat4(1.0);
+        model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
+        model = glm::rotate(model, 30 * toRadians, glm::vec3(0.0f, 1.0f, 0.0f));
+        model = glm::scale(model, glm::vec3(8.0f, 8.0f, 8.0f));
         modelaux = model;
         glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
         castillo.RenderModel();
 
         model = glm::mat4(1.0);
-        model = glm::translate(model, glm::vec3(0.0f, 0.5f, 0.0f));
+        model = glm::translate(model, glm::vec3(0.0f, -5.0f, 0.0f));
+        model = glm::rotate(model, 30 * toRadians, glm::vec3(0.0f, 1.0f, 0.0f));
         modelaux = model;
-        // model = glm::rotate(model, -90 * toRadians, glm::vec3(1.0f, 0.0f, 0.0f));
+        model = glm::scale(model, glm::vec3(8.0f, 8.0f, 8.0f));
         glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
        constMedio.RenderModel();
+       model = modelaux;
+       model = glm::translate(model, glm::vec3(-90.0f, 15.0f, 25.0f));
+       glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+       ring.RenderModel();
 
         model = glm::mat4(1.0);
-        model = glm::translate(model, glm::vec3(0.0f, 0.5f, 0.0f));
-        modelaux = model;
-        // model = glm::rotate(model, -90 * toRadians, glm::vec3(1.0f, 0.0f, 0.0f));
+        model = glm::translate(model, glm::vec3(0.0f, -1.0f, 0.0f));
+        model = glm::rotate(model, 30 * toRadians, glm::vec3(0.0f, 1.0f, 0.0f));
+        model = glm::scale(model, glm::vec3(8.0f, 8.0f, 8.0f));
         glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
         esqIzq.RenderModel();
 
         model = glm::mat4(1.0);
-        model = glm::translate(model, glm::vec3(0.0f, 0.5f, 0.0f));
+        model = glm::translate(model, glm::vec3(0.0f, -1.0f, 0.0f));
+        model = glm::rotate(model, 30 * toRadians, glm::vec3(0.0f, 1.0f, 0.0f));
+        model = glm::scale(model, glm::vec3(8.0f, 8.0f, 8.0f));
         modelaux = model;
-        // model = glm::rotate(model, -90 * toRadians, glm::vec3(1.0f, 0.0f, 0.0f));
         glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
         casitaIzq.RenderModel();
 
         model = glm::mat4(1.0);
-        model = glm::translate(model, glm::vec3(0.0f, 0.5f, 0.0f));
+        model = glm::translate(model, glm::vec3(0.0f, -5.0f, 0.0f));
+        model = glm::rotate(model, 30 * toRadians, glm::vec3(0.0f, 1.0f, 0.0f));
+        model = glm::scale(model, glm::vec3(8.0f, 8.0f, 8.0f));
         modelaux = model;
-        // model = glm::rotate(model, -90 * toRadians, glm::vec3(1.0f, 0.0f, 0.0f));
         glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
         ruinasIzq.RenderModel();
 
         model = glm::mat4(1.0);
-        model = glm::translate(model, glm::vec3(0.0f, 0.5f, 0.0f));
+        model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
+        model = glm::rotate(model, 30 * toRadians, glm::vec3(0.0f, 1.0f, 0.0f));
+        model = glm::scale(model, glm::vec3(8.0f, 8.0f, 8.0f));
         modelaux = model;
-        // model = glm::rotate(model, -90 * toRadians, glm::vec3(1.0f, 0.0f, 0.0f));
         glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
         esqIzqFrente.RenderModel();
 
         model = glm::mat4(1.0);
-        model = glm::translate(model, glm::vec3(0.0f, 0.5f, 0.0f));
+        model = glm::translate(model, glm::vec3(0.0f, -1.0f, 0.0f));
+        model = glm::rotate(model, 30 * toRadians, glm::vec3(0.0f, 1.0f, 0.0f));
+        model = glm::scale(model, glm::vec3(8.0f, 8.0f, 8.0f));
         modelaux = model;
-        // model = glm::rotate(model, -90 * toRadians, glm::vec3(1.0f, 0.0f, 0.0f));
         glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
         cajaFrente.RenderModel();
 
         model = glm::mat4(1.0);
-        model = glm::translate(model, glm::vec3(0.0f, 0.5f, 0.0f));
+        model = glm::translate(model, glm::vec3(0.0f, -1.0f, 0.0f));
+        model = glm::rotate(model, 30 * toRadians, glm::vec3(0.0f, 1.0f, 0.0f));
+        model = glm::scale(model, glm::vec3(8.0f, 8.0f, 8.0f));
         modelaux = model;
-        // model = glm::rotate(model, -90 * toRadians, glm::vec3(1.0f, 0.0f, 0.0f));
         glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
         constFrente.RenderModel();
 
         model = glm::mat4(1.0);
-        model = glm::translate(model, glm::vec3(0.0f, 0.5f, 0.0f));
+        model = glm::translate(model, glm::vec3(0.0f, -1.0f, 0.0f));
+        model = glm::rotate(model, 30 * toRadians, glm::vec3(0.0f, 1.0f, 0.0f));
+        model = glm::scale(model, glm::vec3(8.0f, 8.0f, 8.0f));
         modelaux = model;
-        // model = glm::rotate(model, -90 * toRadians, glm::vec3(1.0f, 0.0f, 0.0f));
         glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
         explanadaDer.RenderModel();
 
         model = glm::mat4(1.0);
-        model = glm::translate(model, glm::vec3(0.0f, 0.5f, 0.0f));
+        model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
+        model = glm::rotate(model, 30 * toRadians, glm::vec3(0.0f, 1.0f, 0.0f));
+        model = glm::scale(model, glm::vec3(8.0f, 8.0f, 8.0f));
         modelaux = model;
         // model = glm::rotate(model, -90 * toRadians, glm::vec3(1.0f, 0.0f, 0.0f));
         glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+        roca.UseTexture();
         esqDer.RenderModel();
 
+        model = glm::mat4(1.0);
+        model = glm::translate(model, glm::vec3(0.0f, -1.0f, 0.0f));
+        model = glm::rotate(model, 30 * toRadians, glm::vec3(0.0f, 1.0f, 0.0f));
+        model = glm::scale(model, glm::vec3(8.0f, 8.0f, 8.0f));
+        modelaux = model;
+        // model = glm::rotate(model, -90 * toRadians, glm::vec3(1.0f, 0.0f, 0.0f));
+        glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+        constMedioChiquito.RenderModel();
+        
+        model = glm::mat4(1.0);
+        model = glm::translate(model, glm::vec3(0.0f, -1.0f, 0.0f));
+        model = glm::rotate(model, 30 * toRadians, glm::vec3(0.0f, 1.0f, 0.0f));
+        model = glm::scale(model, glm::vec3(8.0f, 8.0f, 8.0f));
+        modelaux = model;
+        // model = glm::rotate(model, -90 * toRadians, glm::vec3(1.0f, 0.0f, 0.0f));
+        glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+        FrenteIzq.RenderModel();
 
-        renderTorus();
+
+
+        model = glm::mat4(1.0);
+        model = glm::translate(model, glm::vec3(100.0f, 0.0f, 200.0f));
+        glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+        race.UseTexture();
+        racecourse.RenderModel();
+
+
 
 
 
@@ -677,7 +848,182 @@ int main()
         mainWindow.swapBuffers();
     }
 
-    cleanupTorus();
 
     return 0;
+}
+
+
+void inputKeyframes(bool* keys)
+{
+    if (keys[GLFW_KEY_SPACE])
+    {
+        if (reproduciranimacion < 1)
+        {
+            if (play == false && (FrameIndex > 1))
+            {
+                resetElements();
+                //First Interpolation				
+                interpolation();
+                play = true;
+                playIndex = 0;
+                i_curr_steps = 0;
+                reproduciranimacion++;
+                printf("\n presiona 0 para habilitar reproducir de nuevo la animaciï¿½n'\n");
+                habilitaranimacion = 0;
+
+            }
+            else
+            {
+                play = false;
+
+            }
+        }
+    }
+    if (keys[GLFW_KEY_0])
+    {
+        if (habilitaranimacion < 1 && reproduciranimacion>0)
+        {
+            printf("Ya puedes reproducir de nuevo la animaciï¿½n con la tecla de barra espaciadora'\n");
+            reproduciranimacion = 0;
+
+        }
+    }
+
+    if (keys[GLFW_KEY_L])
+    {
+        if (guardoFrame < 1)
+        {
+            saveFrame();
+            printf("movCoco_x es: %f\n", movCoco_x);
+            printf("movCoco_y es: %f\n", movCoco_y);
+            printf("presiona P para habilitar guardar otro frame'\n");
+            guardoFrame++;
+            reinicioFrame = 0;
+        }
+    }
+    if (keys[GLFW_KEY_P])
+    {
+        if (reinicioFrame < 1)
+        {
+            guardoFrame = 0;
+            printf("Ya puedes guardar otro frame presionando la tecla L'\n");
+        }
+    }
+
+
+    if (keys[GLFW_KEY_1])
+    {
+        if (ciclo < 1)
+        {
+            //printf("movCoco_x es: %f\n", movCoco_x);
+            movCoco_x += 1.0f;
+            printf("\n movCoco_x es: %f\n", movCoco_x);
+            ciclo++;
+            ciclo2 = 0;
+            printf("\n Presiona la tecla 2 para poder habilitar la variable\n");
+        }
+
+    }
+    if (keys[GLFW_KEY_2])
+    {
+        if (ciclo2 < 1)
+        {
+            ciclo = 0;
+            ciclo2++;
+            printf("\n Ya puedes modificar tu variable presionando la tecla 1\n");
+        }
+    }
+    if (keys[GLFW_KEY_3])
+    {
+        if (ciclo3 < 1)
+        {
+            //printf("movCoco_x es: %f\n", movCoco_x);
+            movCoco_x -= 1.0f;
+            printf("\n movCoco_x es: %f\n", movCoco_x);
+            ciclo3++;
+            ciclo4 = 0;
+            printf("\n Presiona la tecla 4 para poder habilitar la variable\n");
+        }
+
+    }
+    if (keys[GLFW_KEY_4])
+    {
+        if (ciclo4 < 1)
+        {
+            ciclo3 = 0;
+            ciclo4++;
+            printf("\n Ya puedes modificar tu variable presionando la tecla 3\n");
+        }
+    }
+
+    //movimiento en Y
+    if (keys[GLFW_KEY_5])
+    {
+        if (ciclo5 < 1)
+        {
+            //printf("movCoco_x es: %f\n", movCoco_x);
+            movCoco_y += 1.0f;
+            printf("\n movAvion_y es: %f\n", movCoco_y);
+            ciclo5++;
+            ciclo6 = 0;
+            printf("\n Presiona la tecla 6 para poder habilitar la variable\n");
+        }
+
+    }
+    if (keys[GLFW_KEY_6])
+    {
+        if (ciclo6 < 1)
+        {
+            ciclo5 = 0;
+            ciclo6++;
+            printf("\n Ya puedes modificar tu variable presionando la tecla 5\n");
+        }
+    }
+
+    if (keys[GLFW_KEY_7])
+    {
+        if (ciclo7 < 1)
+        {
+            //printf("movCoco_x es: %f\n", movCoco_x);
+            movCoco_y -= 1.0f;
+            printf("\n movAvion_y es: %f\n", movCoco_y);
+            ciclo7++;
+            ciclo8 = 0;
+            printf("\n Presiona la tecla 8 para poder habilitar la variable\n");
+        }
+
+    }
+    if (keys[GLFW_KEY_8])
+    {
+        if (ciclo8 < 1)
+        {
+            ciclo7 = 0;
+            ciclo8++;
+            printf("\n Ya puedes modificar tu variable presionando la tecla 7\n");
+        }
+    }
+
+    if (keys[GLFW_KEY_R])
+    {
+        resetElements();
+        printf("--- Leyendo archivo y reiniciando animaciÃ³n ---\n");
+
+        play = false;
+        i_curr_steps = 0;
+
+
+        readFile();
+
+        if (FrameIndex > 1)
+        {
+            interpolation();
+            play = true;
+            playIndex = 0;
+        }
+        else
+        {
+            printf("Archivo leÃ­do, pero no hay suficientes frames para animar.\n");
+        }
+    }
+
 }
