@@ -1,5 +1,5 @@
 /*
- Proyecto final para ComputaciÛn Gr·fica e InteracciÛn Humano - Computadora
+ Proyecto final para Computaci√≥n Gr√°fica e Interacci√≥n Humano - Computadora
 */
 
 //para cargar imagen
@@ -31,7 +31,7 @@
 #include "Skybox.h"
 #include "Beastie.hpp"
 
-//para iluminaciÛn
+//para iluminaci√≥n
 #include "CommonValues.h"
 #include "DirectionalLight.h"
 #include "PointLight.h"
@@ -39,7 +39,7 @@
 #include "Material.h"
 const float toRadians = 3.14159265f / 180.0f;
 
-//variables para animaciÛn
+//variables para animaci√≥n
 float toffsetflechau = 0.0f;
 float toffsetflechav = 0.0f;
 float toffsetnumerou = 0.0f;
@@ -135,11 +135,11 @@ static const char* vShader = "shaders/shader_light.vert";
 // Fragment Shader
 static const char* fShader = "shaders/shader_light.frag";
 
-//funciÛn para teclado de keyframes 
+//funci√≥n para teclado de keyframes 
 void inputKeyframes(bool* keys);
 
 
-//funciÛn de calculo de normales por promedio de vÈrtices 
+//funci√≥n de calculo de normales por promedio de v√©rtices 
 void calcAverageNormals(unsigned int* indices, unsigned int indiceCount, GLfloat* vertices, unsigned int verticeCount,
 	unsigned int vLength, unsigned int normalOffset)
 {
@@ -249,7 +249,7 @@ void CreateObjects()
 
 	Mesh* obj8 = new Mesh();
 	obj8->CreateMesh(letreroVertices, letreroIndices, sizeof(letreroVertices) / sizeof(GLfloat), sizeof(letreroIndices) / sizeof(unsigned int));
-	meshList.push_back(obj8); // solo un n˙mero
+	meshList.push_back(obj8); // solo un n√∫mero
 
 	calcAverageNormals(indices, 12, vertices, 32, 8, 5);
 
@@ -343,8 +343,8 @@ float	movAvion_x = 0.0f, movAvion_y = 0.0f;
 float giroAvion = 0;
 float ang_tronco = 0.0f, ang_hojas = 0.0f;
 
-#define MAX_FRAMES 100 //N˙mero de cuadros m·ximos
-int i_max_steps = 100; //N˙mero de pasos entre cuadros para interpolaciÛn, a mayor n˙mero , m·s lento ser· el movimiento
+#define MAX_FRAMES 100 //N√∫mero de cuadros m√°ximos
+int i_max_steps = 100; //N√∫mero de pasos entre cuadros para interpolaci√≥n, a mayor n√∫mero , m√°s lento ser√° el movimiento
 int i_curr_steps = 0;
 typedef struct _frame
 {
@@ -358,7 +358,7 @@ typedef struct _frame
 }FRAME;
 
 FRAME KeyFrame[MAX_FRAMES];
-int FrameIndex = 0;			//El n˙mero de cuadros guardados actualmente desde 0 para no sobreescribir
+int FrameIndex = 0;			//El n√∫mero de cuadros guardados actualmente desde 0 para no sobreescribir
 bool play = false;
 int playIndex = 0;
 
@@ -399,7 +399,7 @@ void saveFrame(void) //tecla L
 	KeyFrame[FrameIndex].ang_tronco = ang_tronco;
 	KeyFrame[FrameIndex].ang_hojas = ang_hojas;
 	KeyFrame[FrameIndex].giroAvion = giroAvion;
-	//Se agregan nuevas lÌneas para guardar m·s variables si es necesario
+	//Se agregan nuevas l√≠neas para guardar m√°s variables si es necesario
 	
 	//no volatil,se requiere agregar una forma de escribir a un archivo para guardar los frames
 	FrameIndex++;
@@ -428,25 +428,25 @@ void animate(void)
 {
 	//Movimiento del objeto con barra espaciadora
 	if (play) {
-		//fin de animaciÛn entre frames?
+		//fin de animaci√≥n entre frames?
 		if (i_curr_steps >= i_max_steps) {
 			playIndex++;
 			printf("playindex : %d\n", playIndex);
-			//Fin de toda la animaciÛn con ˙ltimo frame?
+			//Fin de toda la animaci√≥n con √∫ltimo frame?
 			if (playIndex > FrameIndex - 2) {
 				printf("Frame index= %d\n", FrameIndex);
 				printf("termino la animacion\n");
 				playIndex = 0;
 				play = false;
 			} else {
-				//InterpolaciÛn del prÛximo cuadro
+				//Interpolaci√≥n del pr√≥ximo cuadro
 				
 				i_curr_steps = 0; //Resetea contador
 				//Interpolar
 				interpolation();
 			}
 		} else {
-			//Dibujar AnimaciÛn
+			//Dibujar Animaci√≥n
 			ang_tronco += KeyFrame[playIndex].ang_tronco_inc ;
 			ang_hojas += KeyFrame[playIndex].ang_hojas_inc ;
 			giroAvion += KeyFrame[playIndex].giroAvionInc;
@@ -552,7 +552,7 @@ int main()
 	Material_opaco = Material(0.3f, 4);
 
 
-	//luz direccional, sÛlo 1 y siempre debe de existir
+	//luz direccional, s√≥lo 1 y siempre debe de existir
 	mainLight = DirectionalLight(1.0f, 1.0f, 1.0f,
 		0.4f, 0.4f,
 		0.0f, -1.0f, 0.0f);
@@ -684,7 +684,7 @@ int main()
 		uniformColor = shaderList[0].getColorLocation();
 		uniformTextureOffset = shaderList[0].getOffsetLocation(); // para la textura con movimiento
 		
-		//informaciÛn en el shader de intensidad especular y brillo
+		//informaci√≥n en el shader de intensidad especular y brillo
 		uniformSpecularIntensity = shaderList[0].GetSpecularIntensityLocation();
 		uniformShininess = shaderList[0].GetShininessLocation();
 
@@ -692,8 +692,8 @@ int main()
 		glUniformMatrix4fv(uniformView, 1, GL_FALSE, glm::value_ptr(camera.calculateViewMatrix()));
 		glUniform3f(uniformEyePosition, camera.getCameraPosition().x, camera.getCameraPosition().y, camera.getCameraPosition().z);
 
-		// luz ligada a la c·mara de tipo flash
-		//sirve para que en tiempo de ejecuciÛn (dentro del while) se cambien propiedades de la luz
+		// luz ligada a la c√°mara de tipo flash
+		//sirve para que en tiempo de ejecuci√≥n (dentro del while) se cambien propiedades de la luz
 		// glm::vec3 lowerLight = camera.getCameraPosition();
 		// lowerLight.y -= 0.3f;
 		// spotLights[0].SetFlash(lowerLight, camera.getCameraDirection());
@@ -876,7 +876,7 @@ int main()
 		glm::mat4 papu = glm::rotate(glm::mat4(1.0f), (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
 		dir = papu * dir;
 		mainLight.SetDir(dir);
-		//informaciÛn al shader de fuentes de iluminaciÛn
+		//informaci√≥n al shader de fuentes de iluminaci√≥n
 		shaderList[0].SetDirectionalLight(&mainLight);
 		shaderList[0].SetPointLights(pointLights, pointLightCount);
 		shaderList[0].SetSpotLights(spotLights, spotLightCount);
@@ -909,7 +909,7 @@ void inputKeyframes(bool* keys)
 				playIndex = 0;
 				i_curr_steps = 0;
 				reproduciranimacion++;
-				printf("\n presiona 0 para habilitar reproducir de nuevo la animaciÛn'\n");
+				printf("\n presiona 0 para habilitar reproducir de nuevo la animaci√≥n'\n");
 				habilitaranimacion = 0;
 
 			} else {
@@ -920,7 +920,7 @@ void inputKeyframes(bool* keys)
 	}
 	if (keys[GLFW_KEY_0]) {
 		if (habilitaranimacion < 1 && reproduciranimacion>0) {
-			printf("Ya puedes reproducir de nuevo la animaciÛn con la tecla de barra espaciadora'\n");
+			printf("Ya puedes reproducir de nuevo la animaci√≥n con la tecla de barra espaciadora'\n");
 			reproduciranimacion = 0;
 		}
 	}
