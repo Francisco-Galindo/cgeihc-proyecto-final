@@ -81,6 +81,7 @@ Texture roca;
 Texture techo;
 Texture wall;
 Texture wood;
+Texture plateado;
 
 Model Kitt_M;
 Model Llanta_M;
@@ -105,7 +106,7 @@ Model FrenteIzq;
 Model casaTux;
 Model smallCasaTux;
 Model ring;
-
+Model santo;
 
 //materiales
 Material Material_brillante;
@@ -455,7 +456,7 @@ int main()
     Numero2Texture.LoadTextureA();
     Degradado = Texture("Textures/degradado.png");
     Degradado.LoadTextureA();
-    race = Texture("Textures/racecourse.png");
+    race = Texture("Textures/tokyo.png");
     race.LoadTextureA();
     bottom_Trunk = Texture("Textures/Bottom_Trunk.bmp");
     bottom_Trunk.LoadTextureA();
@@ -469,6 +470,8 @@ int main()
     wood.LoadTextureA();
     wall = Texture("Textures/wall.png");
     wall.LoadTextureA();
+    plateado = Texture("Textures/plateado.png");
+    plateado.LoadTextureA();
 
     Kitt_M = Model();
     Kitt_M.LoadModel("Models/kitt_optimizado.obj");
@@ -510,7 +513,8 @@ int main()
     casaTux.LoadModel("Models/casaTux.obj");
     ring = Model();
     ring.LoadModel("Models/ring_lucha_libre.obj");
-
+    santo = Model();
+    santo.LoadModel("Models/santo.obj");
 
     smallCasaTux = Model();
     smallCasaTux.LoadModel("Models/smallCasaTux.obj");
@@ -742,6 +746,13 @@ glm::vec3(-1.0f, 0.0f, -5.0f), glm::vec3(-5.0f, 0.0f, -5.0f), glm::vec3(0.0f, 0.
        glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
        ring.RenderModel();
 
+       model = glm::translate(model, glm::vec3(35.0f, 2.0f, -8.0f));
+       model = glm::rotate(model, 60 * toRadians, glm::vec3(0.0f, 1.0f, 0.0f));
+       model = glm::scale(model, glm::vec3(0.1f, 0.1f, 0.1f));
+       glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+       plateado.LoadTextureA();
+       santo.RenderModel();
+
         model = glm::mat4(1.0);
         model = glm::translate(model, glm::vec3(0.0f, -1.0f, 0.0f));
         model = glm::rotate(model, 30 * toRadians, glm::vec3(0.0f, 1.0f, 0.0f));
@@ -828,7 +839,9 @@ glm::vec3(-1.0f, 0.0f, -5.0f), glm::vec3(-5.0f, 0.0f, -5.0f), glm::vec3(0.0f, 0.
 
 
         model = glm::mat4(1.0);
-        model = glm::translate(model, glm::vec3(100.0f, 0.0f, 200.0f));
+        model = glm::translate(model, glm::vec3(100.0f, 0.0f, -200.0f));
+        model = glm::rotate(model, 90 * toRadians, glm::vec3(0.0f, 1.0f, 0.0f));
+        model = glm::scale(model, glm::vec3(8.0f, 8.0f, 8.0f));
         glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
         race.UseTexture();
         racecourse.RenderModel();
