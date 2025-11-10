@@ -9,12 +9,12 @@ Model::Model()
 
 void Model::LoadModel(const std::string & fileName)
 {
-	Assimp::Importer importer;//					Pasa de Polygons y Quads a triangulos, modifica orden para el origen, generar normales si el  objeto no tiene, trata vértices iguales como 1 solo
-	//const aiScene *scene=importer.ReadFile(fileName,aiProcess_Triangulate |aiProcess_FlipUVs|aiProcess_GenSmoothNormals|aiProcess_JoinIdenticalVertices);
+	//Pasa de Polygons y Quads a triangulos, modifica orden para el origen, generar normales si el  objeto no tiene, trata vÃ©rtices iguales como 1 solo
+	Assimp::Importer importer;
 	const aiScene *scene = importer.ReadFile(fileName, aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_JoinIdenticalVertices);
 	if (!scene)
 	{	
-		printf("Falló en cargar el modelo: %s \n", fileName.c_str(), importer.GetErrorString());
+		printf("FallÃ³ en cargar el modelo: %s \n", fileName.c_str(), importer.GetErrorString());
 		return;
 	}
 	LoadNode(scene->mRootNode, scene);
@@ -56,8 +56,6 @@ void Model::RenderModel()
 		MeshList[i]->RenderMesh();
 
 	}
-
-
 }
 
 
@@ -94,7 +92,7 @@ void Model::LoadMesh(aiMesh * mesh, const aiScene * scene)
 		{
 			vertices.insert(vertices.end(), { 0.0f,0.0f });
 		}
-		//Normals importante, las normales son negativas porque la luz interactúa con ellas de esa forma, cómo se vio con el 
+		//Normals importante, las normales son negativas porque la luz interactÃºa con ellas de esa forma, cÃ³mo se vio con el 
 		
 		vertices.insert(vertices.end(), { -mesh->mNormals[i].x,-mesh->mNormals[i].y ,-mesh->mNormals[i].z });
 	}
@@ -130,7 +128,7 @@ void Model::LoadMaterials(const aiScene * scene)
 				if (std::string(path.data).rfind("/"))
 				{
 					//printf("entre a 1 / \n");
-					idx = std::string(path.data).rfind("/");//para quitar del path del modelo todo lo que este antes del \ de ubicación de directorio
+					idx = std::string(path.data).rfind("/");//para quitar del path del modelo todo lo que este antes del \ de ubicaciÃ³n de directorio
 					//printf("\npath: %s\n", std::string(path.data).c_str());
 					filename = std::string(path.data).substr(idx + 1);
 					//printf("\nfilename: %s\n", filename.c_str());
@@ -155,7 +153,7 @@ void Model::LoadMaterials(const aiScene * scene)
 				{
 					if (!TextureList[i]->LoadTextureA())
 					{
-						printf("Falló en cargar la Textura :%s\n", texPath.c_str());
+						printf("FallÃ³ en cargar la Textura :%s\n", texPath.c_str());
 						delete TextureList[i];
 						TextureList[i] = nullptr;
 					}
@@ -164,7 +162,7 @@ void Model::LoadMaterials(const aiScene * scene)
 				{
 					if (!TextureList[i]->LoadTexture())
 					{
-						printf("Falló en cargar la Textura :%s\n", texPath.c_str());
+						printf("FallÃ³ en cargar la Textura :%s\n", texPath.c_str());
 						delete TextureList[i];
 						TextureList[i] = nullptr;
 					}
@@ -173,7 +171,7 @@ void Model::LoadMaterials(const aiScene * scene)
 		}
 		if (!TextureList[i])
 		{
-			TextureList[i] = new Texture("Textures/plain.png"); //textura que se aplicará a los modelos si no tienen textura o la textura no se puede cargar
+			TextureList[i] = new Texture("Textures/plain.png"); //textura que se aplicarÃ¡ a los modelos si no tienen textura o la textura no se puede cargar
 			TextureList[i]->LoadTextureA();
 		}
 
