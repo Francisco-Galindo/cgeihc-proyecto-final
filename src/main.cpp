@@ -54,8 +54,9 @@ float toffsetnumerocambiau = 0.0;
 float angulovaria = 0.0f;
 float dragonavance = 0.0f;
 float reproduciranimacion, habilitaranimacion, guardoFrame, reinicioFrame, 
-ciclo, ciclo2, ciclo3, ciclo4,ciclo5,ciclo6,ciclo7,ciclo8, contador = 0;
-int i, a=20;
+ciclo, ciclo2, ciclo3, ciclo4,ciclo5,ciclo6,ciclo7,ciclo8, ciclo9,ciclo0, contador = 0;
+int i, a = 20;
+bool manejoAni = false;
 
 
 Window mainWindow;
@@ -83,6 +84,7 @@ Texture wall;
 Texture wood;
 Texture plateado;
 Texture metal;
+Texture chest;
 
 Model Kitt_M;
 Model Llanta_M;
@@ -109,6 +111,10 @@ Model smallCasaTux;
 Model ring;
 Model santo;
 Model lampara;
+Model chest_lid;
+Model chest_body;
+Model chest_key;
+
 
 //materiales
 Material Material_brillante;
@@ -119,7 +125,7 @@ FILE* archivo;
 errno_t err;
 char linea[100];
 
-//Sphere cabeza = Sphere(0.5, 20, 20);
+Sphere sp = Sphere(0.1, 20, 20);
 GLfloat deltaTime = 0.0f;
 GLfloat lastTime = 0.0f;
 static double limitFPS = 1.0 / 60.0;
@@ -301,8 +307,8 @@ bool animacion = false;
 
 
 //NEW// Keyframes
-float posXcoco = -1.0, posYcoco = 10.0, posZcoco = 1.0;
-float	movCoco_x = 0.0f, movCoco_y = 0.0f;
+float posXLlave = 0.0, posYLlave = -0.0, posZLlave = 0.0;
+float	movLlave_x = 0.0f, movLlave_y = 0.0f, giroLlave = 0.0f, giroCofre;
 
 #define MAX_FRAMES 100 //N�mero de cuadros m�ximos
 int i_max_steps = 20; //N�mero de pasos entre cuadros para interpolaci�n, a mayor n�mero , m�s lento ser� el movimiento
@@ -310,10 +316,15 @@ int i_curr_steps = 0;
 typedef struct _frame
 {
     //Variables para GUARDAR Key Frames
-    float movCoco_x;		//Variable para PosicionX
-    float movCoco_y;		//Variable para PosicionY
-    float movCoco_xInc;		//Variable para IncrementoX
-    float movCoco_yInc;		//Variable para IncrementoY
+    float movLlave_x;		//Variable para PosicionX
+    float movLlave_y;		//Variable para PosicionY
+    float movLlave_xInc;		//Variable para IncrementoX
+    float movLlave_yInc;		//Variable para IncrementoY
+    float giroLlave;
+    float giroLlaveInc;
+    float giroCofre;
+    float giroCofreInc;
+
 }FRAME;
 
 FRAME KeyFrame[MAX_FRAMES];
@@ -327,8 +338,10 @@ void saveFrame(void) //tecla L
     printf("frameindex %d\n", FrameIndex);
 
 
-    KeyFrame[FrameIndex].movCoco_x = movCoco_x;
-    KeyFrame[FrameIndex].movCoco_y = movCoco_y;
+    KeyFrame[FrameIndex].movLlave_x = movLlave_x;
+    KeyFrame[FrameIndex].movLlave_y = movLlave_y;
+    KeyFrame[FrameIndex].giroLlave = giroLlave;
+    KeyFrame[FrameIndex].giroCofre = giroCofre;
     //Se agregan nuevas l�neas para guardar m�s variables si es necesario
 
     //no volatil,se requiere agregar una forma de escribir a un archivo para guardar los frames
@@ -339,9 +352,10 @@ void saveFrame(void) //tecla L
         printf("Error al abrir el archivo.\n");
         exit(EXIT_FAILURE);
     }
-    fprintf(archivo, "%f\n", movCoco_x);
-    fprintf(archivo, "%f\n", movCoco_y);
-
+    fprintf(archivo, "%f\n", movLlave_x);
+    fprintf(archivo, "%f\n", movLlave_y);
+    fprintf(archivo, "%f\n", giroLlave);
+    fprintf(archivo, "%f\n", giroCofre);
     fclose(archivo);
 
 }
@@ -355,9 +369,9 @@ void readFile(void) {
 
     // Reiniciamos FrameIndex para cargar la animación desde cero
     FrameIndex = 0;
-    float x, y;
+    float x, y, g, g2;
 
-    while (fscanf_s(archivo, "%f\n%f", &x, &y) == 2)
+    while (fscanf_s(archivo, "%f %f %f %f", &x, &y, &g, &g2) == 4)
     {
         if (FrameIndex >= MAX_FRAMES) {
             printf("Se alcanzó el máximo de frames (%d).\n", MAX_FRAMES);
@@ -365,11 +379,12 @@ void readFile(void) {
         }
 
         // Guardamos los valores en el ARREGLO, no en las variables globales
-        KeyFrame[FrameIndex].movCoco_x = x;
-        KeyFrame[FrameIndex].movCoco_y = y;
+        KeyFrame[FrameIndex].movLlave_x = x;
+        KeyFrame[FrameIndex].movLlave_y = y;
+        KeyFrame[FrameIndex].giroLlave = g;
+        KeyFrame[FrameIndex].giroCofre = g2;
 
-        printf("Leído Frame %d: x=%.1f, y=%.1f, g=%.1f\n", FrameIndex, x, y);
-
+        printf("Leído Frame %d: x=%.1f, y=%.1f, g=%.1f, g2=%.1f\n", FrameIndex, x, y, g, g2);
         FrameIndex++; // Incrementamos el índice de frames leídos
     }
 
@@ -381,15 +396,19 @@ void readFile(void) {
 void resetElements(void) //Tecla 0
 {
 
-    movCoco_x = KeyFrame[0].movCoco_x;
-    movCoco_y = KeyFrame[0].movCoco_y;
+    movLlave_x = KeyFrame[0].movLlave_x;
+    movLlave_y = KeyFrame[0].movLlave_y;
+    giroLlave = KeyFrame[0].giroLlave;
+    giroCofre = KeyFrame[0].giroCofre;
 }
+
 
 void interpolation(void)
 {
-    KeyFrame[playIndex].movCoco_xInc = (KeyFrame[playIndex + 1].movCoco_x - KeyFrame[playIndex].movCoco_x) / i_max_steps;
-    KeyFrame[playIndex].movCoco_yInc = (KeyFrame[playIndex + 1].movCoco_y - KeyFrame[playIndex].movCoco_y) / i_max_steps;
-
+    KeyFrame[playIndex].movLlave_xInc = (KeyFrame[playIndex + 1].movLlave_x - KeyFrame[playIndex].movLlave_x) / i_max_steps;
+    KeyFrame[playIndex].movLlave_yInc = (KeyFrame[playIndex + 1].movLlave_y - KeyFrame[playIndex].movLlave_y) / i_max_steps;
+    KeyFrame[playIndex].giroLlaveInc = (KeyFrame[playIndex + 1].giroLlave - KeyFrame[playIndex].giroLlave) / i_max_steps;
+    KeyFrame[playIndex].giroCofreInc = (KeyFrame[playIndex + 1].giroCofre - KeyFrame[playIndex].giroCofre) / i_max_steps;
 }
 
 
@@ -402,6 +421,7 @@ void animate(void)
         {
             playIndex++;
             printf("playindex : %d\n", playIndex);
+
             if (playIndex > FrameIndex - 2)	//Fin de toda la animaci�n con �ltimo frame?
             {
                 printf("Frame index= %d\n", FrameIndex);
@@ -409,6 +429,15 @@ void animate(void)
                 playIndex = 0;
                 play = false;
             }
+
+            else if (playIndex > FrameIndex - 3)	//Fin de toda la animaci�n con �ltimo frame?
+            {
+                if (manejoAni == false) {
+                    manejoAni = true;
+                }
+                
+            }
+
             else //Interpolaci�n del pr�ximo cuadro
             {
 
@@ -420,9 +449,13 @@ void animate(void)
         else
         {
             //Dibujar Animaci�n
-            movCoco_x += KeyFrame[playIndex].movCoco_xInc;
-            movCoco_y += KeyFrame[playIndex].movCoco_yInc;
-            i_curr_steps++;
+            if (manejoAni == false) {
+                movLlave_x += KeyFrame[playIndex].movLlave_xInc;
+                movLlave_y += KeyFrame[playIndex].movLlave_yInc;
+                giroLlave += KeyFrame[playIndex].giroLlaveInc;
+                giroCofre += KeyFrame[playIndex].giroCofreInc;
+                i_curr_steps++;
+            }
         }
 
     }
@@ -477,6 +510,9 @@ int main()
     plateado.LoadTextureA();
     metal = Texture("Textures/metal028.png");
     metal.LoadTextureA();
+    chest = Texture("Textures/chest.png");
+    chest.LoadTextureA();
+
 
     Kitt_M = Model();
     Kitt_M.LoadModel("Models/kitt_optimizado.obj");
@@ -522,9 +558,16 @@ int main()
     santo.LoadModel("Models/santo.obj");
     lampara = Model();
     lampara.LoadModel("Models/lampara.obj");
-
     smallCasaTux = Model();
     smallCasaTux.LoadModel("Models/smallCasaTux.obj");
+    chest_lid = Model();
+    chest_lid.LoadModel("Models/chest_lid.obj");
+    chest_body = Model();
+    chest_body.LoadModel("Models/chest_body.obj");
+    chest_key = Model();
+    chest_key.LoadModel("Models/chest_key.obj");
+
+
 
     std::vector<std::string> skyboxFaces;
     skyboxFaces.push_back("Textures/Skybox/cupertin-lake_rt.tga");
@@ -609,8 +652,12 @@ glm::vec3(0.0f, 0.0f, -5.0f), glm::vec3(3.0f, 0.0f, -5.0f), glm::vec3(-5.0f, 0.0
 glm::vec3(5.0f, 0.0f, -5.0f), glm::vec3(2.0f, 0.0f, -5.0f), glm::vec3(-3.0f, 0.0f, -5.0f), glm::vec3(1.0f, 0.0f, -5.0f),
 glm::vec3(-1.0f, 0.0f, -5.0f), glm::vec3(-5.0f, 0.0f, -5.0f), glm::vec3(0.0f, 0.0f, -5.0f), glm::vec3(-3.0f, 0.0f, -5.0f)};
     
+    glm::vec3 posLlave = glm::vec3(0.0f, 0.0f, 0.0f);
+
     glm::vec3 luz_position = glm::vec3(0.0f, 0.0f, 0.0f);
 
+    sp.init(); //inicializar esfera
+    sp.load();
     ////Loop mientras no se cierra la ventana
 
     printf("\nTeclas para uso de Keyframes:\n1.-Presionar barra espaciadora para reproducir animacion.\n2.-Presionar 0 para volver a habilitar reproduccion de la animacion\n");
@@ -880,8 +927,45 @@ glm::vec3(-1.0f, 0.0f, -5.0f), glm::vec3(-5.0f, 0.0f, -5.0f), glm::vec3(0.0f, 0.
         racecourse.RenderModel();
 
 
+        //cofre con keyframe
+        model = glm::mat4(1.0);
+      
+        model = glm::translate(model, glm::vec3(-50.0f, 0.0f, 140.0f));
+        model = glm::rotate(model, 180 * toRadians, glm::vec3(0.0f, 1.0f, 0.0f));
+        model = glm::scale(model, glm::vec3(5.0f, 5.0f, 5.0f));
+        glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+        chest.UseTexture();
+        chest_body.RenderModel();
+        model = glm::translate(model, glm::vec3(0.0f, 1.1f, -0.7f));
+        
+        modelaux = model;
+       
+        glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+        glUniform3fv(uniformColor, 1, glm::value_ptr(color)); 
+        sp.render();
+        
+        model = modelaux;
+        modelaux = model;
+        model = glm::rotate(model, giroCofre * toRadians, glm::vec3(-1.0f, 0.0f, 0.0f));
+        glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+        chest.UseTexture();
+        chest_lid.RenderModel();
 
+        model = modelaux;
+        model = glm::translate(model, glm::vec3(0.0f, -0.2f, 2.0f));
+        posLlave = glm::vec3(posXLlave + movLlave_x, posYLlave, posZLlave + movLlave_y);
+        model = glm::translate(model, posLlave);
+        model = glm::rotate(model, giroLlave * toRadians, glm::vec3(0.0f, 0.0f, 1.0f));
+        modelaux = model;
+        model = glm::scale(model, glm::vec3(0.5f, 0.5f, 0.5f));
+        glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+        glUniform3fv(uniformColor, 1, glm::value_ptr(color));
+        sp.render();
 
+        model = modelaux;
+        glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+        chest.UseTexture();
+        chest_key.RenderModel();
 
         glDisable(GL_BLEND);
 
@@ -925,23 +1009,14 @@ void inputKeyframes(bool* keys)
             }
         }
     }
-    if (keys[GLFW_KEY_0])
-    {
-        if (habilitaranimacion < 1 && reproduciranimacion>0)
-        {
-            printf("Ya puedes reproducir de nuevo la animaci�n con la tecla de barra espaciadora'\n");
-            reproduciranimacion = 0;
-
-        }
-    }
 
     if (keys[GLFW_KEY_L])
     {
         if (guardoFrame < 1)
         {
             saveFrame();
-            printf("movCoco_x es: %f\n", movCoco_x);
-            printf("movCoco_y es: %f\n", movCoco_y);
+            printf("movLlave_x es: %f\n", movLlave_x);
+            printf("movLlave_y es: %f\n", movLlave_y);
             printf("presiona P para habilitar guardar otro frame'\n");
             guardoFrame++;
             reinicioFrame = 0;
@@ -961,9 +1036,9 @@ void inputKeyframes(bool* keys)
     {
         if (ciclo < 1)
         {
-            //printf("movCoco_x es: %f\n", movCoco_x);
-            movCoco_x += 1.0f;
-            printf("\n movCoco_x es: %f\n", movCoco_x);
+            //printf("movLlave_x es: %f\n", movLlave_x);
+            movLlave_x += 1.0f;
+            printf("\n movLlave_x es: %f\n", movLlave_x);
             ciclo++;
             ciclo2 = 0;
             printf("\n Presiona la tecla 2 para poder habilitar la variable\n");
@@ -983,9 +1058,9 @@ void inputKeyframes(bool* keys)
     {
         if (ciclo3 < 1)
         {
-            //printf("movCoco_x es: %f\n", movCoco_x);
-            movCoco_x -= 1.0f;
-            printf("\n movCoco_x es: %f\n", movCoco_x);
+            //printf("movLlave_x es: %f\n", movLlave_x);
+            movLlave_x -= 1.0f;
+            printf("\n movLlave_x es: %f\n", movLlave_x);
             ciclo3++;
             ciclo4 = 0;
             printf("\n Presiona la tecla 4 para poder habilitar la variable\n");
@@ -1007,9 +1082,9 @@ void inputKeyframes(bool* keys)
     {
         if (ciclo5 < 1)
         {
-            //printf("movCoco_x es: %f\n", movCoco_x);
-            movCoco_y += 1.0f;
-            printf("\n movAvion_y es: %f\n", movCoco_y);
+            //printf("movLlave_x es: %f\n", movLlave_x);
+            movLlave_y += 1.0f;
+            printf("\n movllave_y es: %f\n", movLlave_y);
             ciclo5++;
             ciclo6 = 0;
             printf("\n Presiona la tecla 6 para poder habilitar la variable\n");
@@ -1030,9 +1105,9 @@ void inputKeyframes(bool* keys)
     {
         if (ciclo7 < 1)
         {
-            //printf("movCoco_x es: %f\n", movCoco_x);
-            movCoco_y -= 1.0f;
-            printf("\n movAvion_y es: %f\n", movCoco_y);
+            //printf("movLlave_x es: %f\n", movLlave_x);
+            movLlave_y -= 1.0f;
+            printf("\n movllave_y es: %f\n", movLlave_y);
             ciclo7++;
             ciclo8 = 0;
             printf("\n Presiona la tecla 8 para poder habilitar la variable\n");
@@ -1049,6 +1124,30 @@ void inputKeyframes(bool* keys)
         }
     }
 
+    if (keys[GLFW_KEY_9])
+    {
+        if (ciclo9 < 1)
+        {
+            //printf("movAvion_x es: %f\n", movAvion_x);
+            giroLlave += 22.5f;
+            printf("\n giroAvion es: %f\n", giroLlave);
+            ciclo9++;
+            ciclo0 = 0;
+            printf("\n Presiona la tecla 2 para poder habilitar la variable\n");
+        }
+
+    }
+    if (keys[GLFW_KEY_0])
+    {
+        if (ciclo0 < 1)
+        {
+            ciclo9 = 0;
+            ciclo0++;
+            printf("\n Ya puedes modificar tu variable presionando la tecla 1\n");
+        }
+    }
+
+
     if (keys[GLFW_KEY_R])
     {
         resetElements();
@@ -1056,7 +1155,7 @@ void inputKeyframes(bool* keys)
 
         play = false;
         i_curr_steps = 0;
-
+        manejoAni = false;
 
         readFile();
 
