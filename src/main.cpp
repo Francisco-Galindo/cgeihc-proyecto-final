@@ -11,7 +11,9 @@
 #include <string.h>
 #include <cmath>
 #include <vector>
+#include <cerrno>
 #include <math.h>
+#include <stdlib.h>
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
@@ -42,21 +44,22 @@
 const float toRadians = 3.14159265f / 180.0f;
 
 //variables para animación
-float toffsetflechau = 0.0f;
-float toffsetflechav = 0.0f;
-float toffsetnumerou = 0.0f;
-float toffsetnumerov = 0.0f;
-float toffsetnumerocambiau = 0.0;
-float dragonavance = 0.0f;
 float movCoche;
 float movOffset;
 float rotllanta;
 float rotllantaOffset;
 bool avanza;
+float toffsetflechau = 0.0f;
+float toffsetflechav = 0.0f;
+float toffsetnumerou = 0.0f;
+float toffsetnumerov = 0.0f;
+float toffsetnumerocambiau = 0.0;
 float angulovaria = 0.0f;
-
-// variables para keyframes
-float reproduciranimacion, habilitaranimacion, guardoFrame, reinicioFrame, ciclo, ciclo2, ciclo3, ciclo4, ciclo5, ciclo6, ciclo7, ciclo8, ciclo9, ciclo10, contador = 0;
+float dragonavance = 0.0f;
+float reproduciranimacion, habilitaranimacion, guardoFrame, reinicioFrame, 
+ciclo, ciclo2, ciclo3, ciclo4,ciclo5,ciclo6,ciclo7,ciclo8, ciclo9,ciclo0, contador = 0;
+int i, a = 20;
+bool manejoAni = false;
 
 
 Window mainWindow;
@@ -70,6 +73,18 @@ Texture dirtTexture;
 Texture dadoTexture;
 Texture plainTexture;
 Texture pisoTexture;
+
+Texture Degradado;
+Texture race;
+Texture bottom_Trunk;
+Texture coconut;
+Texture roca;
+Texture techo;
+Texture wall;
+Texture wood;
+Texture plateado;
+Texture metal;
+Texture chest;
 
 Texture letreroTexture;
 
@@ -116,6 +131,30 @@ Model avatarAntebrazo_M;
 Model avatarMuslo_M;
 Model avatarPierna_M;
 
+Model castillo;
+Model constMedio;
+Model constMedioChiquito;
+Model esqIzq;
+Model casitaIzq;
+Model ruinasIzq;
+Model esqIzqFrente;
+Model cajaFrente;
+Model constFrente;
+Model explanadaDer;
+Model esqDer;
+Model racecourse;
+Model palmera;
+Model coco;
+Model FrenteIzq;
+Model casaTux;
+Model smallCasaTux;
+Model ring;
+Model santo;
+Model lampara;
+Model chest_lid;
+Model chest_body;
+Model chest_key;
+
 Avatar *avatar;
 
 Skybox skybox;
@@ -124,6 +163,12 @@ Skybox skybox;
 Material Material_brillante;
 Material Material_opaco;
 
+//archivos
+FILE* archivo;
+int err;
+char linea[100];
+
+Sphere sp = Sphere(0.1, 20, 20);
 
 GLfloat deltaTime = 0.0f;
 GLfloat lastTime = 0.0f;
@@ -346,95 +391,111 @@ void CrearDado()
 
 ///////////////////////////////KEYFRAMES/////////////////////
 
-
 bool animacion = false;
 
 
-
 //NEW// Keyframes
-float posXavion = 2.0, posYavion = 5.0, posZavion = -3.0;
-float	movAvion_x = 0.0f, movAvion_y = 0.0f;
-float giroAvion = 0;
-float ang_tronco = 0.0f, ang_hojas = 0.0f;
+float posXLlave = 0.0, posYLlave = -0.0, posZLlave = 0.0;
+float	movLlave_x = 0.0f, movLlave_y = 0.0f, giroLlave = 0.0f, giroCofre;
 
-#define MAX_FRAMES 100 //Número de cuadros máximos
-int i_max_steps = 100; //Número de pasos entre cuadros para interpolación, a mayor número , más lento será el movimiento
+#define MAX_FRAMES 100 //N�mero de cuadros m�ximos
+int i_max_steps = 20; //N�mero de pasos entre cuadros para interpolaci�n, a mayor n�mero , m�s lento ser� el movimiento
 int i_curr_steps = 0;
 typedef struct _frame
 {
-	//Variables para GUARDAR Key Frames
-	float ang_tronco;		//Variable para PosicionX
-	float ang_hojas;		//Variable para PosicionY
-	float ang_tronco_inc;		//Variable para IncrementoX
-	float ang_hojas_inc;		//Variable para IncrementoY
-	float giroAvion;		//Variable para GiroAvion
-	float giroAvionInc;		//Variable para IncrementoGiroAvion
+    //Variables para GUARDAR Key Frames
+    float movLlave_x;		//Variable para PosicionX
+    float movLlave_y;		//Variable para PosicionY
+    float movLlave_xInc;		//Variable para IncrementoX
+    float movLlave_yInc;		//Variable para IncrementoY
+    float giroLlave;
+    float giroLlaveInc;
+    float giroCofre;
+    float giroCofreInc;
+
 }FRAME;
 
 FRAME KeyFrame[MAX_FRAMES];
-int FrameIndex = 0;			//El número de cuadros guardados actualmente desde 0 para no sobreescribir
+int FrameIndex = 6;			//El n�mero de cuadros guardados actualmente desde 0 para no sobreescribir
 bool play = false;
 int playIndex = 0;
-
-
-void readKeyframes(std::string path) {
-	std::fstream archivo(path, std::ios_base::in);
-
-	float x, y, a;
-        while (archivo >> x >> y >> a) {
-		KeyFrame[FrameIndex].ang_tronco = x;
-		KeyFrame[FrameIndex].ang_hojas = y;
-		KeyFrame[FrameIndex].giroAvion = a;
-		std::cout << "Leyendo keyframe\t x: " << x << ", \ty: " << y << ", \trot: " << a << "\n";
-
-		FrameIndex++;
-	}          
-}
-
-void writeKeyframe(std::string path, float x, float y, float a) {
-	std::ofstream archivo(path, std::ios::app);
-
-        if (!archivo) {
-		std::cout << "Error: No se pudo abrir archivo '" << path << "'";
-		return;
-	}
-
-        archivo << x << " " << y << " " << a << "\n";
-        std::cout << "Escribiendo a txt: " << x << " " << y << " " << a << "\n";
-	archivo.close();
-}
 
 void saveFrame(void) //tecla L
 {
 
-	printf("frameindex %d\n", FrameIndex);
+    printf("frameindex %d\n", FrameIndex);
 
 
-	KeyFrame[FrameIndex].ang_tronco = ang_tronco;
-	KeyFrame[FrameIndex].ang_hojas = ang_hojas;
-	KeyFrame[FrameIndex].giroAvion = giroAvion;
-	//Se agregan nuevas líneas para guardar más variables si es necesario
-	
-	//no volatil,se requiere agregar una forma de escribir a un archivo para guardar los frames
-	FrameIndex++;
+    KeyFrame[FrameIndex].movLlave_x = movLlave_x;
+    KeyFrame[FrameIndex].movLlave_y = movLlave_y;
+    KeyFrame[FrameIndex].giroLlave = giroLlave;
+    KeyFrame[FrameIndex].giroCofre = giroCofre;
+    //Se agregan nuevas l�neas para guardar m�s variables si es necesario
 
-	writeKeyframe("keyframes-palmera.txt", ang_tronco, ang_hojas, giroAvion);
+    //no volatil,se requiere agregar una forma de escribir a un archivo para guardar los frames
+    FrameIndex++;
+
+    archivo = fopen("datos.txt", "a");
+    if (err != 0 || archivo == NULL) {
+        printf("Error al abrir el archivo.\n");
+        exit(EXIT_FAILURE);
+    }
+    fprintf(archivo, "%f\n", movLlave_x);
+    fprintf(archivo, "%f\n", movLlave_y);
+    fprintf(archivo, "%f\n", giroLlave);
+    fprintf(archivo, "%f\n", giroCofre);
+    fclose(archivo);
+
+}
+
+void readFile(void) {
+    archivo = fopen("datos.txt", "r");
+    if (err != 0 || archivo == NULL) {
+        printf("Error al abrir el archivo.\n");
+        return; 
+    }
+
+    // Reiniciamos FrameIndex para cargar la animación desde cero
+    FrameIndex = 0;
+    float x, y, g, g2;
+
+    while (fscanf(archivo, "%f %f %f %f", &x, &y, &g, &g2) == 4) {
+        if (FrameIndex >= MAX_FRAMES) {
+            printf("Se alcanzó el máximo de frames (%d).\n", MAX_FRAMES);
+            break; // Evitar que se desborde el arreglo
+        }
+
+        // Guardamos los valores en el ARREGLO, no en las variables globales
+        KeyFrame[FrameIndex].movLlave_x = x;
+        KeyFrame[FrameIndex].movLlave_y = y;
+        KeyFrame[FrameIndex].giroLlave = g;
+        KeyFrame[FrameIndex].giroCofre = g2;
+
+        printf("Leído Frame %d: x=%.1f, y=%.1f, g=%.1f, g2=%.1f\n", FrameIndex, x, y, g, g2);
+        FrameIndex++; // Incrementamos el índice de frames leídos
+    }
+
+    fclose(archivo);
+    printf("Lectura de archivo completa. Total de frames cargados: %d\n", FrameIndex);
+
 }
 
 void resetElements(void) //Tecla 0
 {
 
-	ang_tronco = KeyFrame[0].ang_tronco;
-	ang_hojas = KeyFrame[0].ang_hojas;
-	giroAvion = KeyFrame[0].giroAvion;
+    movLlave_x = KeyFrame[0].movLlave_x;
+    movLlave_y = KeyFrame[0].movLlave_y;
+    giroLlave = KeyFrame[0].giroLlave;
+    giroCofre = KeyFrame[0].giroCofre;
 }
+
 
 void interpolation(void)
 {
-	KeyFrame[playIndex].ang_tronco_inc = (KeyFrame[playIndex + 1].ang_tronco - KeyFrame[playIndex].ang_tronco) / i_max_steps;
-	KeyFrame[playIndex].ang_hojas_inc = (KeyFrame[playIndex + 1].ang_hojas - KeyFrame[playIndex].ang_hojas) / i_max_steps;
-	KeyFrame[playIndex].giroAvionInc = (KeyFrame[playIndex + 1].giroAvion - KeyFrame[playIndex].giroAvion) / i_max_steps;
-
+    KeyFrame[playIndex].movLlave_xInc = (KeyFrame[playIndex + 1].movLlave_x - KeyFrame[playIndex].movLlave_x) / i_max_steps;
+    KeyFrame[playIndex].movLlave_yInc = (KeyFrame[playIndex + 1].movLlave_y - KeyFrame[playIndex].movLlave_y) / i_max_steps;
+    KeyFrame[playIndex].giroLlaveInc = (KeyFrame[playIndex + 1].giroLlave - KeyFrame[playIndex].giroLlave) / i_max_steps;
+    KeyFrame[playIndex].giroCofreInc = (KeyFrame[playIndex + 1].giroCofre - KeyFrame[playIndex].giroCofre) / i_max_steps;
 }
 
 
@@ -442,33 +503,42 @@ void animate(void)
 {
 	//Movimiento del objeto con barra espaciadora
 	if (play) {
-		//fin de animación entre frames?
+		// fin de animaci�n entre frames?
 		if (i_curr_steps >= i_max_steps) {
 			playIndex++;
 			printf("playindex : %d\n", playIndex);
-			//Fin de toda la animación con último frame?
+
+			//Fin de toda la animaci�n con �ltimo frame?
 			if (playIndex > FrameIndex - 2) {
 				printf("Frame index= %d\n", FrameIndex);
 				printf("termino la animacion\n");
 				playIndex = 0;
 				play = false;
+			} else if (playIndex > FrameIndex - 3) {
+				// Fin de toda la animaci�n con �ltimo frame?
+				if (manejoAni == false) {
+					manejoAni = true;
+				}
+
 			} else {
-				//Interpolación del próximo cuadro
-				
+				//Interpolaci�n del pr�ximo cuadro
 				i_curr_steps = 0; //Resetea contador
 				//Interpolar
 				interpolation();
 			}
 		} else {
-			//Dibujar Animación
-			ang_tronco += KeyFrame[playIndex].ang_tronco_inc ;
-			ang_hojas += KeyFrame[playIndex].ang_hojas_inc ;
-			giroAvion += KeyFrame[playIndex].giroAvionInc;
-			i_curr_steps++;
+			//Dibujar Animaci�n
+			if (manejoAni == false) {
+				movLlave_x += KeyFrame[playIndex].movLlave_xInc;
+				movLlave_y += KeyFrame[playIndex].movLlave_yInc;
+				giroLlave += KeyFrame[playIndex].giroLlaveInc;
+				giroCofre += KeyFrame[playIndex].giroCofreInc;
+				i_curr_steps++;
+			}
 		}
-
 	}
 }
+
 
 ///////////////* FIN KEYFRAMES*////////////////////////////
 
@@ -496,6 +566,30 @@ int main()
 
 	letreroTexture = Texture("Textures/fuente-limpio.png");
 	letreroTexture.LoadTextureA();
+
+	Degradado = Texture("Textures/degradado.png");
+	Degradado.LoadTextureA();
+	race = Texture("Textures/tokyo.png");
+	race.LoadTextureA();
+	bottom_Trunk = Texture("Textures/Bottom_Trunk.bmp");
+	bottom_Trunk.LoadTextureA();
+	coconut = Texture("Textures/Coconut_01.png");
+	coconut.LoadTextureA();
+	roca = Texture("Textures/roca.png");
+	roca.LoadTextureA();
+	techo = Texture("Textures/roof.png");
+	techo.LoadTextureA();
+	wood = Texture("Textures/oldWood.png");
+	wood.LoadTextureA();
+	wall = Texture("Textures/wall.png");
+	wall.LoadTextureA();
+	plateado = Texture("Textures/plateado.png");
+	plateado.LoadTextureA();
+	metal = Texture("Textures/metal028.png");
+	metal.LoadTextureA();
+	chest = Texture("Textures/chest.png");
+	chest.LoadTextureA();
+
 
 	Lampara_M = Model();
 	Lampara_M.LoadModel("Models/posteluz.fbx");
@@ -568,6 +662,54 @@ int main()
 	explanadaDer_M.LoadModel("Models/tulum/explanadaDer.obj");
 	ruinasIzq_M = Model();
 	ruinasIzq_M.LoadModel("Models/tulum/ruinasIzq.obj");
+
+
+	castillo = Model();
+	castillo.LoadModel("Models/tulum/castillo.obj");
+	constMedio = Model();
+	constMedio.LoadModel("Models/tulum/constCentro.obj");
+	constMedioChiquito = Model();
+	constMedioChiquito.LoadModel("Models/tulum/constCentroTecho.obj");
+	esqIzq = Model();
+	esqIzq.LoadModel("Models/tulum/esqIzq.obj");
+	casitaIzq = Model();
+	casitaIzq.LoadModel("Models/tulum/casaDer.obj");
+	ruinasIzq = Model();
+	ruinasIzq.LoadModel("Models/tulum/muroDer.obj");
+	esqIzqFrente = Model();
+	esqIzqFrente.LoadModel("Models/tulum/muroDerFrente.obj");
+	cajaFrente = Model();
+	cajaFrente.LoadModel("Models/tulum/cajaFrente.obj");
+	constFrente = Model();
+	constFrente.LoadModel("Models/tulum/constFrente.obj");
+	explanadaDer = Model();
+	explanadaDer.LoadModel("Models/tulum/planoIzq.obj");
+	FrenteIzq = Model();
+	FrenteIzq.LoadModel("Models/tulum/frenteIzq.obj");
+	esqDer = Model();
+	esqDer.LoadModel("Models/tulum/esqDer.obj");
+	racecourse = Model();
+	racecourse.LoadModel("Models/racecourse.obj");
+	palmera = Model();
+	palmera.LoadModel("Models/tulum/palmera.obj");
+	coco = Model();
+	coco.LoadModel("Models/coco/coco.obj");
+	casaTux = Model();
+	casaTux.LoadModel("Models/casaTux.obj");
+	ring = Model();
+	ring.LoadModel("Models/ring_lucha_libre.obj");
+	santo = Model();
+	santo.LoadModel("Models/santo.obj");
+	lampara = Model();
+	lampara.LoadModel("Models/lampara.obj");
+	smallCasaTux = Model();
+	smallCasaTux.LoadModel("Models/smallCasaTux.obj");
+	chest_lid = Model();
+	chest_lid.LoadModel("Models/chest_lid.obj");
+	chest_body = Model();
+	chest_body.LoadModel("Models/chest_body.obj");
+	chest_key = Model();
+	chest_key.LoadModel("Models/chest_key.obj");
 	
 
 	std::vector<std::string> skyboxFaces;
@@ -584,58 +726,122 @@ int main()
 	Material_opaco = Material(0.3f, 4);
 
 
+	glm::vec3 luces[20] = {glm::vec3(-120.0f, -1.0f, -10.0f), glm::vec3(30.0f, 0.0f, 0.0f), glm::vec3(30.0f, 0.0f, 0.0f), glm::vec3(30.0f, 0.0f, 0.0f),
+			       glm::vec3(30.0f, 0.0f, 0.0f) ,glm::vec3(0.0f, 0 - 0.0f, 30.0f) , glm::vec3(0.0f, 0.0f, 30.0f), glm::vec3(0.0f, 0.0f, 30.0f), glm::vec3(0.0f, 0.0f, 30.0f),
+			       glm::vec3(-30.0f, 0.0f, 0.0f),glm::vec3(-30.0f, 0.0f, 0.0f),glm::vec3(-30.0f, 0.0f, 0.0f), glm::vec3(-10.0f, 0.0f, -30.0f), glm::vec3(-10.0f, 0.0f, -30.0f),
+			       glm::vec3(-10.0f, 0.0f, -30.0f)};
+
+
+
 	//luz direccional, sólo 1 y siempre debe de existir
 	mainLight = DirectionalLight(1.0f, 1.0f, 1.0f,
-		0.4f, 0.4f,
-		0.0f, -1.0f, 0.0f);
+				     0.2f, 0.2f,
+				     0.0f, 0.0f, -1.0f);
 	//contador de luces puntuales
 	unsigned int pointLightCount = 0;
+	//Declaración de primer luz puntual
+
+        int luz = 15;
+    
+	for (int i = 0; i < luz; i++) {
+		pointLights[i] = PointLight(1.0f, 1.0f, 1.0f,
+					    2.0f, 2.0f,
+					    0.0f, 2.5f, 1.5f,
+					    0.3f, 0.2f, 0.1f);
+	}
+
+
 	unsigned int spotLightCount = 0;
-
 	//linterna
-	luzLinterna = SpotLight(1.0f, 1.0f, 1.0f,
-		0.0f, 2.0f,
-		0.0f, 0.0f, 0.0f,
-		0.0f, -1.0f, 0.0f,
-		1.0f, 0.0f, 0.0f,
-		5.0f);
+	spotLights[0] = SpotLight(1.0f, 1.0f, 1.0f,
+				  0.0f, 2.0f,
+				  0.0f, 0.0f, 0.0f,
+				  0.0f, -1.0f, 0.0f,
+				  1.0f, 0.0f, 0.0f,
+				  5.0f);
+	spotLightCount++;
 
-	faroDelantero = SpotLight(1.0f, 1.0f, 0.0f,
-		1.0f, 0.2f,
-		5.0f, 10.0f, 0.0f,
-		-2.0f, 0.0f, 0.0f,
-		1.0f, 0.001f, 0.001f,
-		20.0f);
+	// //luz fija
+	// spotLights[1] = SpotLight(0.0f, 0.0f, 1.0f,
+	// 			  1.0f, 2.0f,
+	// 			  5.0f, 10.0f, 0.0f,
+	// 			  0.0f, -5.0f, 0.0f,
+	// 			  1.0f, 0.0f, 0.0f,
+	// 			  15.0f);
+	// spotLightCount++;
 
-	faroTrasero = SpotLight(0.0f, 1.0f, 1.0f,
-		1.0f, 0.2f,
-		5.0f, 10.0f, 0.0f,
-		2.0f, 0.0f, 0.0f,
-		1.0f, 0.001f, 0.001f,
-		20.0f);
 
-	luzCofre = SpotLight(0.25f, 1.0f, 0.0f,
-		1.0f, 2.0f,
-		5.0f, 10.0f, 0.0f,
-		-2.0f, 0.0f, 0.0f,
-		1.0f, 0.001f, 0.001f,
-		15.0f);
 
-	luzDiablo = PointLight(1.0f, 0.125f, 0.0f,
-		0.8f, 0.8f,
-		6.0f, 2.5f, 1.5f,
-		0.3f, 0.2f, 0.1f);
 
-	luzPoste = PointLight(1.0f, 1.0f, 1.0f,
-		1.0f, 2.0f,
-		0.0f, 12.0f, -19.25f,
-		1.0f, 0.01f, 0.01f);
+
+	// //luz direccional, sólo 1 y siempre debe de existir
+	// mainLight = DirectionalLight(1.0f, 1.0f, 1.0f,
+	// 	0.4f, 0.4f,
+	// 	0.0f, -1.0f, 0.0f);
+	// //contador de luces puntuales
+	// pointLightCount = 0;
+	// spotLightCount = 0;
+
+	// //linterna
+	// luzLinterna = SpotLight(1.0f, 1.0f, 1.0f,
+	// 	0.0f, 2.0f,
+	// 	0.0f, 0.0f, 0.0f,
+	// 	0.0f, -1.0f, 0.0f,
+	// 	1.0f, 0.0f, 0.0f,
+	// 	5.0f);
+
+	// faroDelantero = SpotLight(1.0f, 1.0f, 0.0f,
+	// 	1.0f, 0.2f,
+	// 	5.0f, 10.0f, 0.0f,
+	// 	-2.0f, 0.0f, 0.0f,
+	// 	1.0f, 0.001f, 0.001f,
+	// 	20.0f);
+
+	// faroTrasero = SpotLight(0.0f, 1.0f, 1.0f,
+	// 	1.0f, 0.2f,
+	// 	5.0f, 10.0f, 0.0f,
+	// 	2.0f, 0.0f, 0.0f,
+	// 	1.0f, 0.001f, 0.001f,
+	// 	20.0f);
+
+	// luzCofre = SpotLight(0.25f, 1.0f, 0.0f,
+	// 	1.0f, 2.0f,
+	// 	5.0f, 10.0f, 0.0f,
+	// 	-2.0f, 0.0f, 0.0f,
+	// 	1.0f, 0.001f, 0.001f,
+	// 	15.0f);
+
+	// luzDiablo = PointLight(1.0f, 0.125f, 0.0f,
+	// 	0.8f, 0.8f,
+	// 	6.0f, 2.5f, 1.5f,
+	// 	0.3f, 0.2f, 0.1f);
+
+	// luzPoste = PointLight(1.0f, 1.0f, 1.0f,
+	// 	1.0f, 2.0f,
+	// 	0.0f, 12.0f, -19.25f,
+	// 	1.0f, 0.01f, 0.01f);
 
 	GLuint uniformProjection = 0, uniformModel = 0, uniformView = 0, uniformEyePosition = 0,
 		uniformSpecularIntensity = 0, uniformShininess = 0, uniformTextureOffset=0;
 	GLuint uniformColor = 0;
 	glm::mat4 projection = glm::perspective(45.0f, (GLfloat)mainWindow.getBufferWidth() / mainWindow.getBufferHeight(), 0.1f, 1000.0f);
 	glm::vec3 posblackhawk = glm::vec3(2.0f, 0.0f, 0.0f);
+
+	glm::vec3 poscoco = glm::vec3(0.0f, 0.0f, 0.0f);
+
+	glm::vec3 arbol[20] = { glm::vec3(-2.0f, 0.0f, -5.0f), glm::vec3(1.0f, 0.0f, -5.0f), glm::vec3(0.0f, 0.0f, -5.0f),
+				glm::vec3(-1.0f, 0.0f, -5.0f), glm::vec3(-4.0f, 0.0f, -5.0f), glm::vec3(4.0f, 0.0f, -5.0f), glm::vec3(-3.0f, 0.0f, -5.0f),
+				glm::vec3(0.0f, 0.0f, -5.0f), glm::vec3(3.0f, 0.0f, -5.0f), glm::vec3(-5.0f, 0.0f, -5.0f), glm::vec3(-1.0f, 0.0f, -5.0f),
+				glm::vec3(5.0f, 0.0f, -5.0f), glm::vec3(2.0f, 0.0f, -5.0f), glm::vec3(-3.0f, 0.0f, -5.0f), glm::vec3(1.0f, 0.0f, -5.0f),
+				glm::vec3(-1.0f, 0.0f, -5.0f), glm::vec3(-5.0f, 0.0f, -5.0f), glm::vec3(0.0f, 0.0f, -5.0f), glm::vec3(-3.0f, 0.0f, -5.0f)};
+    
+	glm::vec3 posLlave = glm::vec3(0.0f, 0.0f, 0.0f);
+
+	glm::vec3 luz_position = glm::vec3(0.0f, 0.0f, 0.0f);
+
+	sp.init(); //inicializar esfera
+	sp.load();
+
 
 	std::vector<MovingEntity*> movingEntities;
 
@@ -663,7 +869,7 @@ int main()
         camera.addLocation(glm::vec3(2.0f, 0.0f, 0.0f), glm::vec2(0.0f, 90.0f));
 
 	// Lee los keyframes del archivo
-	readKeyframes("keyframes-palmera.txt");
+	// readKeyframes("keyframes-palmera.txt");
 
 
 	printf("\nTeclas para uso de Keyframes:\n1.-Presionar barra espaciadora para reproducir animacion.\n2.-Presionar 0 para volver a habilitar reproduccion de la animacion\n");
@@ -690,6 +896,7 @@ int main()
 	GLfloat timeSinceStatic = glfwGetTime();
 	int ultimoRandom = 0;
 	int r = 0;
+	int k;
 
 	// Loop mientras no se cierra la ventana
 	while (!mainWindow.getShouldClose())
@@ -757,14 +964,6 @@ int main()
 
 		meshList[2]->RenderMesh();
 
-		// // Dado de Opengl
-		// // Ejercicio 1: Texturizar su cubo con la imagen dado_animales ya optimizada por ustedes
-		// model = glm::mat4(1.0);
-		// model = glm::translate(model, glm::vec3(-10.5f, 5.0f, -10.0f));
-		// glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-		// dadoTexture.UseTexture();
-		// meshList[5]->RenderMesh();
-
 		// Diablo
 		color = glm::vec3(1.0f, 1.0f, 1.0f);
 		model = glm::mat4(1.0);
@@ -773,72 +972,218 @@ int main()
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Diablo_M.RenderModel();
 
-                if (mainWindow.getPrendeDiablo()) {
-			model = glm::translate(model, glm::vec3(0.0f, 1.0f, 0.0f));
-			lightpos = model * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
-			luzDiablo.SetPos(lightpos);
-			pointLights[pointLightCount++] = luzDiablo;
+                // if (mainWindow.getPrendeDiablo()) {
+		// 	model = glm::translate(model, glm::vec3(0.0f, 1.0f, 0.0f));
+		// 	lightpos = model * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+		// 	luzDiablo.SetPos(lightpos);
+		// 	pointLights[pointLightCount++] = luzDiablo;
+		// }
+
+		model = glm::mat4(1.0);
+		model = glm::translate(model, glm::vec3(-170.0f, -5.0f, 0.0f));
+		model = glm::rotate(model, 30 * toRadians, glm::vec3(0.0f, 1.0f, 0.0f));
+		model = glm::scale(model, glm::vec3(0.4f, 0.4f, 0.4f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		casaTux.RenderModel();
+	
+		model = glm::translate(model, glm::vec3(-40.0, -4.0f, 60.0f));;
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		smallCasaTux.RenderModel();
+
+		model = glm::translate(model, glm::vec3(-60.0, 0.0f, 0.0f));;
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		smallCasaTux.RenderModel();
+
+		model = glm::mat4(1.0);
+		model = glm::translate(model, glm::vec3(152.0f, -2.0f, 100.0f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		palmera.RenderModel();
+
+
+		for (i = 0; i < 20; i++) {
+			model = glm::translate(model, arbol[i]);
+			glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+			bottom_Trunk.UseTexture();
+			palmera.RenderModel();
+
 		}
 
 		model = glm::mat4(1.0);
-		posblackhawk=glm::vec3(posXavion + movAvion_x, posYavion + movAvion_y, posZavion);
-		model = glm::translate(model, posblackhawk);
-		model = glm::scale(model, glm::vec3(0.3f, 0.3f, 0.3f));
-		model = glm::rotate(model, giroAvion * toRadians, glm::vec3(0.0f, 1.0f, 0.0f));
-		model = glm::rotate(model, -90 * toRadians, glm::vec3(1.0f, 0.0f, 0.0f));
-		model = glm::rotate(model, 90 * toRadians, glm::vec3(0.0f, 0.0f, 1.0f));
-		Material_brillante.UseMaterial(uniformSpecularIntensity, uniformShininess);
-		//color = glm::vec3(0.0f, 1.0f, 0.0f);
-		//glUniform3fv(uniformColor, 1, glm::value_ptr(color));
+		model = glm::translate(model, luces[0]);
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-		Blackhawk_M.RenderModel();
+		lampara.RenderModel();
+		luz_position = glm::vec3(model[3][0], model[3][1]+5, model[3][2]);
+		pointLights[0].SetPos(luz_position);
 
-		// Tronco
-		color = glm::vec3(1.0f, 1.0f, 1.0f);
+		for (k = 1; k < luz; k++) {
+			model = glm::translate(model, luces[k]);
+			glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+			lampara.RenderModel();
+			luz_position = glm::vec3(model[3][0], model[3][1] + 5, model[3][2]);
+			pointLights[k].SetPos(luz_position);
+			pointLights[pointLightCount++] = pointLights[k];
+		}
+
+
 		model = glm::mat4(1.0);
-		model = glm::translate(model, glm::vec3(40.5f, 0.0f, 5.0));
-		model = glm::scale(model, glm::vec3(2.0f));
-		modelcuerpo = model;
-
-		glUniform3fv(uniformColor, 1, glm::value_ptr(color));
-		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-		piedra_0_M.RenderModel();
-
-		model = glm::rotate(model, glm::radians(ang_tronco), glm::vec3(0.0f, 0.0f, 1.0f));
+		model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
+		model = glm::rotate(model, 30 * toRadians, glm::vec3(0.0f, 1.0f, 0.0f));
+		model = glm::scale(model, glm::vec3(8.0f, 8.0f, 8.0f));
 		modelaux = model;
-		glUniform3fv(uniformColor, 1, glm::value_ptr(color));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-		palmera_ruina_tronco_M.RenderModel();
+		castillo.RenderModel();
 
-		model = glm::translate(model, glm::vec3(0.125f, 6.0f, 0.5));
-		model = glm::rotate(model, glm::radians(ang_hojas), glm::vec3(0.0f, 0.0f, 1.0f));
-		glUniform3fv(uniformColor, 1, glm::value_ptr(color));
-		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-		palmera_ruina_hojas_M.RenderModel();
-
-                model = modelcuerpo;
-		model = glm::translate(model, glm::vec3(-5.0f, 0.0f, 0.0));
-		glUniform3fv(uniformColor, 1, glm::value_ptr(color));
-		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-		tunel_ruina_M.RenderModel();
-
-
-
-		color = glm::vec3(1.0f, 1.0f, 1.0f);
 		model = glm::mat4(1.0);
-		model = glm::translate(model, glm::vec3(25.0f, 0.0f, 10.0));
-		glUniform3fv(uniformColor, 1, glm::value_ptr(color));
+		model = glm::translate(model, glm::vec3(0.0f, -5.0f, 0.0f));
+		model = glm::rotate(model, 30 * toRadians, glm::vec3(0.0f, 1.0f, 0.0f));
+		modelaux = model;
+		model = glm::scale(model, glm::vec3(8.0f, 8.0f, 8.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-		cajaFrente_M.RenderModel();
-		casitaIzq_M.RenderModel();
-		castillo_M.RenderModel();
-		constFrente_M.RenderModel();
-		constMedioChiquito_M.RenderModel();
-		constMedio_M.RenderModel();
-		EsqIzqFrente_M.RenderModel();
-		esqIzq_M.RenderModel();
-		explanadaDer_M.RenderModel();
-		ruinasIzq_M.RenderModel();
+		constMedio.RenderModel();
+		model = modelaux;
+		model = glm::translate(model, glm::vec3(-90.0f, 15.0f, 25.0f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		ring.RenderModel();
+
+		model = glm::translate(model, glm::vec3(35.0f, 2.0f, -8.0f));
+		model = glm::rotate(model, 60 * toRadians, glm::vec3(0.0f, 1.0f, 0.0f));
+		model = glm::scale(model, glm::vec3(0.1f, 0.1f, 0.1f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		santo.RenderModel();
+
+		model = glm::mat4(1.0);
+		model = glm::translate(model, glm::vec3(0.0f, -1.0f, 0.0f));
+		model = glm::rotate(model, 30 * toRadians, glm::vec3(0.0f, 1.0f, 0.0f));
+		model = glm::scale(model, glm::vec3(8.0f, 8.0f, 8.0f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		esqIzq.RenderModel();
+
+		model = glm::mat4(1.0);
+		model = glm::translate(model, glm::vec3(0.0f, -1.0f, 0.0f));
+		model = glm::rotate(model, 30 * toRadians, glm::vec3(0.0f, 1.0f, 0.0f));
+		model = glm::scale(model, glm::vec3(8.0f, 8.0f, 8.0f));
+		modelaux = model;
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		casitaIzq.RenderModel();
+
+		model = glm::mat4(1.0);
+		model = glm::translate(model, glm::vec3(0.0f, -5.0f, 0.0f));
+		model = glm::rotate(model, 30 * toRadians, glm::vec3(0.0f, 1.0f, 0.0f));
+		model = glm::scale(model, glm::vec3(8.0f, 8.0f, 8.0f));
+		modelaux = model;
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		ruinasIzq.RenderModel();
+
+		model = glm::mat4(1.0);
+		model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
+		model = glm::rotate(model, 30 * toRadians, glm::vec3(0.0f, 1.0f, 0.0f));
+		model = glm::scale(model, glm::vec3(8.0f, 8.0f, 8.0f));
+		modelaux = model;
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		esqIzqFrente.RenderModel();
+
+		model = glm::mat4(1.0);
+		model = glm::translate(model, glm::vec3(0.0f, -1.0f, 0.0f));
+		model = glm::rotate(model, 30 * toRadians, glm::vec3(0.0f, 1.0f, 0.0f));
+		model = glm::scale(model, glm::vec3(8.0f, 8.0f, 8.0f));
+		modelaux = model;
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		cajaFrente.RenderModel();
+
+		model = glm::mat4(1.0);
+		model = glm::translate(model, glm::vec3(0.0f, -1.0f, 0.0f));
+		model = glm::rotate(model, 30 * toRadians, glm::vec3(0.0f, 1.0f, 0.0f));
+		model = glm::scale(model, glm::vec3(8.0f, 8.0f, 8.0f));
+		modelaux = model;
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		constFrente.RenderModel();
+
+		model = glm::mat4(1.0);
+		model = glm::translate(model, glm::vec3(0.0f, -1.0f, 0.0f));
+		model = glm::rotate(model, 30 * toRadians, glm::vec3(0.0f, 1.0f, 0.0f));
+		model = glm::scale(model, glm::vec3(8.0f, 8.0f, 8.0f));
+		modelaux = model;
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		explanadaDer.RenderModel();
+
+		model = glm::mat4(1.0);
+		model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
+		model = glm::rotate(model, 30 * toRadians, glm::vec3(0.0f, 1.0f, 0.0f));
+		model = glm::scale(model, glm::vec3(8.0f, 8.0f, 8.0f));
+		modelaux = model;
+		// model = glm::rotate(model, -90 * toRadians, glm::vec3(1.0f, 0.0f, 0.0f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		roca.UseTexture();
+		esqDer.RenderModel();
+
+		model = glm::mat4(1.0);
+		model = glm::translate(model, glm::vec3(0.0f, -1.0f, 0.0f));
+		model = glm::rotate(model, 30 * toRadians, glm::vec3(0.0f, 1.0f, 0.0f));
+		model = glm::scale(model, glm::vec3(8.0f, 8.0f, 8.0f));
+		modelaux = model;
+		// model = glm::rotate(model, -90 * toRadians, glm::vec3(1.0f, 0.0f, 0.0f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		constMedioChiquito.RenderModel();
+	
+		model = glm::mat4(1.0);
+		model = glm::translate(model, glm::vec3(0.0f, -1.0f, 0.0f));
+		model = glm::rotate(model, 30 * toRadians, glm::vec3(0.0f, 1.0f, 0.0f));
+		model = glm::scale(model, glm::vec3(8.0f, 8.0f, 8.0f));
+		modelaux = model;
+		// model = glm::rotate(model, -90 * toRadians, glm::vec3(1.0f, 0.0f, 0.0f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		FrenteIzq.RenderModel();
+
+
+
+		model = glm::mat4(1.0);
+		model = glm::translate(model, glm::vec3(100.0f, 0.0f, -200.0f));
+		model = glm::rotate(model, 90 * toRadians, glm::vec3(0.0f, 1.0f, 0.0f));
+		model = glm::scale(model, glm::vec3(8.0f, 8.0f, 8.0f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		race.UseTexture();
+		racecourse.RenderModel();
+
+
+		//cofre con keyframe
+		model = glm::mat4(1.0);
+      
+		model = glm::translate(model, glm::vec3(-50.0f, 0.0f, 140.0f));
+		model = glm::rotate(model, 180 * toRadians, glm::vec3(0.0f, 1.0f, 0.0f));
+		model = glm::scale(model, glm::vec3(5.0f, 5.0f, 5.0f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		chest.UseTexture();
+		chest_body.RenderModel();
+		model = glm::translate(model, glm::vec3(0.0f, 1.1f, -0.7f));
+	
+		modelaux = model;
+       
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		glUniform3fv(uniformColor, 1, glm::value_ptr(color)); 
+		sp.render();
+	
+		model = modelaux;
+		modelaux = model;
+		model = glm::rotate(model, giroCofre * toRadians, glm::vec3(-1.0f, 0.0f, 0.0f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		chest.UseTexture();
+		chest_lid.RenderModel();
+
+		model = modelaux;
+		model = glm::translate(model, glm::vec3(0.0f, -0.2f, 2.0f));
+		posLlave = glm::vec3(posXLlave + movLlave_x, posYLlave, posZLlave + movLlave_y);
+		model = glm::translate(model, posLlave);
+		model = glm::rotate(model, giroLlave * toRadians, glm::vec3(0.0f, 0.0f, 1.0f));
+		modelaux = model;
+		model = glm::scale(model, glm::vec3(0.5f, 0.5f, 0.5f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		glUniform3fv(uniformColor, 1, glm::value_ptr(color));
+		sp.render();
+
+		model = modelaux;
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		chest.UseTexture();
+		chest_key.RenderModel();
 
 
 		color = glm::vec3(1.0f, 1.0f, 1.0f);
@@ -953,7 +1298,7 @@ void inputKeyframes(bool* keys)
 				playIndex = 0;
 				i_curr_steps = 0;
 				reproduciranimacion++;
-				printf("\n presiona 0 para habilitar reproducir de nuevo la animación'\n");
+				printf("\n presiona 0 para habilitar reproducir de nuevo la animaci�n'\n");
 				habilitaranimacion = 0;
 
 			} else {
@@ -962,18 +1307,12 @@ void inputKeyframes(bool* keys)
 			}
 		}
 	}
-	if (keys[GLFW_KEY_0]) {
-		if (habilitaranimacion < 1 && reproduciranimacion>0) {
-			printf("Ya puedes reproducir de nuevo la animación con la tecla de barra espaciadora'\n");
-			reproduciranimacion = 0;
-		}
-	}
 
 	if (keys[GLFW_KEY_L]) {
 		if (guardoFrame < 1) {
 			saveFrame();
-			printf("ang_tronco es: %f\n", ang_tronco);
-			printf("ang_hojas es: %f\n", ang_hojas);
+			printf("movLlave_x es: %f\n", movLlave_x);
+			printf("movLlave_y es: %f\n", movLlave_y);
 			printf("presiona P para habilitar guardar otro frame'\n");
 			guardoFrame++;
 			reinicioFrame = 0;
@@ -982,7 +1321,6 @@ void inputKeyframes(bool* keys)
 	if (keys[GLFW_KEY_P]) {
 		if (reinicioFrame < 1) {
 			guardoFrame = 0;
-			reinicioFrame++;
 			printf("Ya puedes guardar otro frame presionando la tecla L'\n");
 		}
 	}
@@ -990,9 +1328,9 @@ void inputKeyframes(bool* keys)
 
 	if (keys[GLFW_KEY_1]) {
 		if (ciclo < 1) {
-			//printf("movAvion_x es: %f\n", movAvion_x);
-			ang_tronco += 5.0f;
-			printf("\n ang_tronco es: %f\n", ang_tronco);
+			//printf("movLlave_x es: %f\n", movLlave_x);
+			movLlave_x += 1.0f;
+			printf("\n movLlave_x es: %f\n", movLlave_x);
 			ciclo++;
 			ciclo2 = 0;
 			printf("\n Presiona la tecla 2 para poder habilitar la variable\n");
@@ -1006,16 +1344,14 @@ void inputKeyframes(bool* keys)
 			printf("\n Ya puedes modificar tu variable presionando la tecla 1\n");
 		}
 	}
-
-
 	if (keys[GLFW_KEY_3]) {
 		if (ciclo3 < 1) {
-			//printf("movAvion_x es: %f\n", movAvion_x);
-			ang_tronco -= 5.0f;
-			printf("\n ang_tronco es: %f\n", ang_tronco);
+			//printf("movLlave_x es: %f\n", movLlave_x);
+			movLlave_x -= 1.0f;
+			printf("\n movLlave_x es: %f\n", movLlave_x);
 			ciclo3++;
 			ciclo4 = 0;
-			printf("\n Presiona la tecla 2 para poder habilitar la variable\n");
+			printf("\n Presiona la tecla 4 para poder habilitar la variable\n");
 		}
 
 	}
@@ -1023,19 +1359,19 @@ void inputKeyframes(bool* keys)
 		if (ciclo4 < 1) {
 			ciclo3 = 0;
 			ciclo4++;
-			printf("\n Ya puedes modificar tu variable presionando la tecla 1\n");
+			printf("\n Ya puedes modificar tu variable presionando la tecla 3\n");
 		}
 	}
 
-
+	//movimiento en Y
 	if (keys[GLFW_KEY_5]) {
 		if (ciclo5 < 1) {
-			//printf("movAvion_x es: %f\n", movAvion_x);
-			ang_hojas += 5.0f;
-			printf("\n ang_hojas es: %f\n", ang_hojas);
+			//printf("movLlave_x es: %f\n", movLlave_x);
+			movLlave_y += 1.0f;
+			printf("\n movllave_y es: %f\n", movLlave_y);
 			ciclo5++;
 			ciclo6 = 0;
-			printf("\n Presiona la tecla 2 para poder habilitar la variable\n");
+			printf("\n Presiona la tecla 6 para poder habilitar la variable\n");
 		}
 
 	}
@@ -1043,19 +1379,18 @@ void inputKeyframes(bool* keys)
 		if (ciclo6 < 1) {
 			ciclo5 = 0;
 			ciclo6++;
-			printf("\n Ya puedes modificar tu variable presionando la tecla 1\n");
+			printf("\n Ya puedes modificar tu variable presionando la tecla 5\n");
 		}
 	}
 
-
 	if (keys[GLFW_KEY_7]) {
 		if (ciclo7 < 1) {
-			//printf("movAvion_x es: %f\n", movAvion_x);
-			ang_hojas -= 5.0f;
-			printf("\n ang_hojas es: %f\n", ang_hojas);
+			//printf("movLlave_x es: %f\n", movLlave_x);
+			movLlave_y -= 1.0f;
+			printf("\n movllave_y es: %f\n", movLlave_y);
 			ciclo7++;
 			ciclo8 = 0;
-			printf("\n Presiona la tecla 2 para poder habilitar la variable\n");
+			printf("\n Presiona la tecla 8 para poder habilitar la variable\n");
 		}
 
 	}
@@ -1063,26 +1398,47 @@ void inputKeyframes(bool* keys)
 		if (ciclo8 < 1) {
 			ciclo7 = 0;
 			ciclo8++;
-			printf("\n Ya puedes modificar tu variable presionando la tecla 1\n");
+			printf("\n Ya puedes modificar tu variable presionando la tecla 7\n");
 		}
 	}
 
 	if (keys[GLFW_KEY_9]) {
 		if (ciclo9 < 1) {
 			//printf("movAvion_x es: %f\n", movAvion_x);
-			giroAvion += 180.0f;
-			printf("\n asdf es: %f\n", giroAvion);
+			giroLlave += 22.5f;
+			printf("\n giroAvion es: %f\n", giroLlave);
 			ciclo9++;
-			ciclo10 = 0;
+			ciclo0 = 0;
 			printf("\n Presiona la tecla 2 para poder habilitar la variable\n");
 		}
 
 	}
-	if (keys[GLFW_KEY_O]) {
-		if (ciclo10 < 1) {
+	if (keys[GLFW_KEY_0]) {
+		if (ciclo0 < 1) {
 			ciclo9 = 0;
-			ciclo10++;
+			ciclo0++;
 			printf("\n Ya puedes modificar tu variable presionando la tecla 1\n");
 		}
 	}
+
+
+	if (keys[GLFW_KEY_R]) {
+		resetElements();
+		printf("--- Leyendo archivo y reiniciando animación ---\n");
+
+		play = false;
+		i_curr_steps = 0;
+		manejoAni = false;
+
+		readFile();
+
+		if (FrameIndex > 1) {
+			interpolation();
+			play = true;
+			playIndex = 0;
+		} else {
+			printf("Archivo leído, pero no hay suficientes frames para animar.\n");
+		}
+	}
+
 }

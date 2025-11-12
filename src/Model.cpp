@@ -11,6 +11,7 @@ void Model::LoadModel(const std::string & fileName)
 {
 	//Pasa de Polygons y Quads a triangulos, modifica orden para el origen, generar normales si el  objeto no tiene, trata vértices iguales como 1 solo
 	Assimp::Importer importer;
+	// printf("%s\n", fileName.c_str());
 	const aiScene *scene = importer.ReadFile(fileName, aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_JoinIdenticalVertices);
 	if (!scene)
 	{	
@@ -148,6 +149,7 @@ void Model::LoadMaterials(const aiScene * scene)
 				std::size_t existetga = filename.find(tga);
 				std::size_t existepng= filename.find(png);
 				std::string texPath = std::string("Textures/") + filename;
+				// printf("%s\n", texPath.c_str());
 				TextureList[i] = new Texture(texPath.c_str());
 				if (existetga != std::string::npos || existepng != std::string::npos)
 				{
