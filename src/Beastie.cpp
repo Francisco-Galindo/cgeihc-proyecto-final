@@ -24,7 +24,7 @@ void Beastie::render(GLint uniformModel) {
 	model = glm::translate(model, pos);
 	model = glm::translate(model, glm::vec3(0.0f, -1.0f, 0.0));
 	model = glm::rotate(model, anguloGiro, glm::vec3(0.0f, 1.0f, 0.0));
-	model = glm::scale(model, glm::vec3(2.0f, 2.0f, 2.0f));
+	model = glm::scale(model, glm::vec3(3.0f, 3.0f, 3.0f));
 	modelaux = model;
 	glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 	cuerpo_M->RenderModel();

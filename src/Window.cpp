@@ -1,4 +1,5 @@
 #include "Window.h"
+#include "Camera.h"
 #include <stdio.h>
 #include <cmath>
 
@@ -254,25 +255,19 @@ void Window::ManejaTeclado(GLFWwindow* window, int key, int code, int action, in
 	}
 
 
+	if (key == GLFW_KEY_H) {
+		// recorrido
+		theWindow->camera->startRig();
+	}
 	if (key == GLFW_KEY_J) {
-		theWindow->carVel = -theWindow->maxvel;
-		theWindow->prendeLuzEnfrente = true;
-		theWindow->prendeLuzAtras = false;
+		theWindow->camera->setEstado(THIRD_PERSON_CAMERA);
 	}
 	if (key == GLFW_KEY_K) {
-		theWindow->carVel = theWindow->maxvel;
-		theWindow->prendeLuzEnfrente = false;
-		theWindow->prendeLuzAtras = true;
+		// Libre
+		theWindow->camera->setEstado(FREE_CAMERA);
 	}
-
-	if (key == GLFW_KEY_H && theWindow->articulacion5 > -60.0f) {
-		theWindow->articulacion5 -= 5;
-	}
-	if (key == GLFW_KEY_L && theWindow->articulacion5 <= 0) {
-		theWindow->articulacion5 += 5;
-                if (theWindow->articulacion5 > 0) {
-			theWindow->articulacion5 = 0;
-		}
+	if (key == GLFW_KEY_L && action == GLFW_PRESS) {
+		theWindow->camera->goToNextLocation();
 	}
 
 	if (key == GLFW_KEY_I) {
@@ -339,6 +334,10 @@ void Window::ManejaMouse(GLFWwindow* window, double xPos, double yPos)
 
 	theWindow->lastX = xPos;
 	theWindow->lastY = yPos;
+}
+
+void Window::setCamera(Camera *cam) {
+	camera = cam;
 }
 
 

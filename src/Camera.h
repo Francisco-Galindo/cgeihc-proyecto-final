@@ -1,12 +1,16 @@
 #pragma once
 
 #include "MovingEntity.hpp"
+#include "Avatar.hpp"
 #include <GL/glew.h>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
 #include <GLFW/glfw3.h>
+#include <utility>
+
+enum CameraEstado {THIRD_PERSON_CAMERA, FREE_CAMERA, RIGGING_CAMERA};
 
 class Camera
 {
@@ -17,10 +21,17 @@ public:
 	void keyControl(bool* keys, GLfloat deltaTime);
 	void mouseControl(GLfloat xChange, GLfloat yChange);
 	void updateRig(GLfloat dt);
+        void setEstado(CameraEstado newEstado);
+	void moveToNextLocation();
+	void startRig();
+	void goToNextLocation();
+	void addLocation(glm::vec3 pos, glm::vec2 dir);
 
 	glm::vec3 getCameraPosition();
 	glm::vec3 getCameraDirection();
+	CameraEstado getEstado() { return estado; };
 	glm::mat4 calculateViewMatrix();
+	void setAvatar(Avatar *avatar);
 
 	~Camera();
 
@@ -38,6 +49,9 @@ private:
                 void render(GLint uniformModel) {
 			return;
 		}
+                void setT(GLfloat newT) {
+			t = newT;
+		}
 		// ~Beastie() = default;
 	private:
 		GLfloat roll;
@@ -48,6 +62,7 @@ private:
 	glm::vec3 up;
 	glm::vec3 right;
 	glm::vec3 worldUp;
+	Avatar *avatar;
 
 	GLfloat yaw;
 	GLfloat pitch;
@@ -56,6 +71,14 @@ private:
 	GLfloat turnSpeed;
 
         CameraRig cameraRig;
+
+        CameraEstado estado;
+
+        bool lookAtAvatar;
+	GLfloat distanceToAvatar;
+
+        int locationIndex;
+        std::vector<std::pair<glm::vec3, glm::vec2>> locations;
 
 	void update();
 };

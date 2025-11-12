@@ -3,6 +3,7 @@
 */
 
 //para cargar imagen
+#include "Avatar.hpp"
 #include "MovingEntity.hpp"
 #define STB_IMAGE_IMPLEMENTATION
 
@@ -30,6 +31,7 @@
 #include"Model.h"
 #include "Skybox.h"
 #include "Beastie.hpp"
+#include "Xue.hpp"
 
 //para iluminación
 #include "CommonValues.h"
@@ -93,6 +95,10 @@ Model beastieCarro_M;
 Model beastieCarroLlantaDel_M;
 Model beastieCarroLlantaTras_M;
 
+Model XueCarro_M;
+Model XueTurbina_M;
+Model XuePaleta_M;
+
 Model cajaFrente_M;
 Model casitaIzq_M;
 Model castillo_M;
@@ -103,6 +109,14 @@ Model EsqIzqFrente_M;
 Model esqIzq_M;
 Model explanadaDer_M;
 Model ruinasIzq_M;
+
+Model avatarCuerpo_M;
+Model avatarBrazo_M;
+Model avatarAntebrazo_M;
+Model avatarMuslo_M;
+Model avatarPierna_M;
+
+Avatar *avatar;
 
 Skybox skybox;
 
@@ -469,6 +483,7 @@ int main()
 	CreateShaders();
 
 	camera = Camera(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), -60.0f, 0.0f, 0.3f, 0.5f);
+	mainWindow.setCamera(&camera);
 
 	brickTexture = Texture("Textures/brick.png");
 	brickTexture.LoadTextureA();
@@ -503,6 +518,23 @@ int main()
 	beastieCarroLlantaDel_M.LoadModel("./Models/beastie-carro-llanta-delantera.obj");
 	beastieCarroLlantaTras_M.LoadModel("./Models/beastie-carro-llanta-trasera.obj");
 
+	XueCarro_M = Model();
+	XueTurbina_M = Model();
+	XuePaleta_M = Model();
+	XueCarro_M.LoadModel("./Models/xue-cuerpo.obj");
+	XueTurbina_M.LoadModel("./Models/xue-turbina.obj");
+	XuePaleta_M.LoadModel("./Models/xue-paleta.obj");
+
+        avatarCuerpo_M = Model();
+	avatarCuerpo_M.LoadModel("./Models/avatar-cuerpo.obj");
+        avatarMuslo_M = Model();
+	avatarMuslo_M.LoadModel("./Models/avatar-muslo.obj");
+        avatarPierna_M = Model();
+	avatarPierna_M.LoadModel("./Models/avatar-pierna.obj");
+        avatarBrazo_M = Model();
+	avatarBrazo_M.LoadModel("./Models/avatar-brazo.obj");
+        avatarAntebrazo_M = Model();
+	avatarAntebrazo_M.LoadModel("./Models/avatar-antebrazo.obj");
 
 	Blackhawk_M = Model();
 	Blackhawk_M.LoadModel("Models/uh60.obj");
@@ -616,6 +648,20 @@ int main()
 		return glm::vec3(40.0f * cos(t), 75.0f + 20.0f * sin(t), 100.0f * sin(0.666f * t));
 	}));
 
+        movingEntities.push_back(new Xue(&XueCarro_M, &XuePaleta_M, &XueTurbina_M, glm::vec3(0.0f), [](GLfloat t) {
+		return glm::vec3(40.0f * cos(t), 0.0f, 40.0f * sin(0.666f * t));
+	}));
+
+        avatar = new Avatar(&avatarCuerpo_M, &avatarMuslo_M, &avatarPierna_M, &avatarBrazo_M, &avatarAntebrazo_M, glm::vec3(0.0f, 0.0f, 2.0f));
+	avatar->startAnimation();
+
+        camera.setAvatar(avatar);
+
+        camera.addLocation(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec2(0.0f, 0.0f));
+        camera.addLocation(glm::vec3(0.0f, 2.0f, 0.0f), glm::vec2(45.0f, 0.0f));
+        camera.addLocation(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec2(0.0f, 45.0f));
+        camera.addLocation(glm::vec3(2.0f, 0.0f, 0.0f), glm::vec2(0.0f, 90.0f));
+
 	// Lee los keyframes del archivo
 	readKeyframes("keyframes-palmera.txt");
 
@@ -661,9 +707,9 @@ int main()
 
 		// Recibir eventos del usuario
 		glfwPollEvents();
-                if (true) {
+		if (camera.getEstado() == RIGGING_CAMERA) {
 			camera.updateRig(dt);
-                } else {
+		} else {
 			camera.keyControl(mainWindow.getsKeys(), deltaTime);
 			camera.mouseControl(mainWindow.getXChange(), mainWindow.getYChange());
 		}
@@ -726,9 +772,6 @@ int main()
 		glUniform3fv(uniformColor, 1, glm::value_ptr(color));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Diablo_M.RenderModel();
-		// Arco_M.RenderModel();
-		// Puerta_M.RenderModel();
-		// Porticullis_M.RenderModel();
 
                 if (mainWindow.getPrendeDiablo()) {
 			model = glm::translate(model, glm::vec3(0.0f, 1.0f, 0.0f));
@@ -781,7 +824,6 @@ int main()
 
 
 
-
 		color = glm::vec3(1.0f, 1.0f, 1.0f);
 		model = glm::mat4(1.0);
 		model = glm::translate(model, glm::vec3(25.0f, 0.0f, 10.0));
@@ -807,6 +849,8 @@ int main()
 			entity->render(uniformModel);
 		}
 
+		avatar->update(dt);
+		avatar->render(uniformModel);
 
 		model = glm::mat4(1.0);
 		model = glm::translate(model, glm::vec3(0.0f, -2.0f, -50.0f));

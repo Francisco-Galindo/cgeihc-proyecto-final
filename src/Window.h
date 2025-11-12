@@ -1,4 +1,5 @@
 #pragma once
+#include "Camera.h"
 #include<stdio.h>
 #include<GL/glew.h>
 #include<GLFW/glfw3.h>
@@ -19,6 +20,7 @@ public:
 	GLfloat getXChange();
 	GLfloat getYChange();
 	void swapBuffers() { return glfwSwapBuffers(mainWindow); }
+        void setCamera(Camera *cam);
 	GLfloat getrotay() { return rotay; }
 	GLfloat getrotax() { return rotax; }
 	GLfloat getrotaz() { return rotaz; }
@@ -82,6 +84,7 @@ private:
 	GLfloat xChange;
 	GLfloat yChange;
 	GLfloat dadoAng;
+	Camera *camera;
 	glm::vec3 deslizPos, dadoDir, dadoPos;
 	glm::mat4 dadoMat, oldDadoMat;
 	bool primerGiro, dadoEnAire;
