@@ -3,8 +3,10 @@
 */
 
 //para cargar imagen
-#include "Avatar.hpp"
-#include "MovingEntity.hpp"
+#include "Condor.hpp"
+#include "Delfin.hpp"
+#include "Globo.hpp"
+#include "Suzanne.hpp"
 #define STB_IMAGE_IMPLEMENTATION
 
 #include <stdio.h>
@@ -34,6 +36,9 @@
 #include "Skybox.h"
 #include "Beastie.hpp"
 #include "Xue.hpp"
+#include "Avatar.hpp"
+#include "MovingEntity.hpp"
+#include "Tux.hpp"
 
 //para iluminación
 #include "CommonValues.h"
@@ -131,6 +136,24 @@ Model avatarAntebrazo_M;
 Model avatarMuslo_M;
 Model avatarPierna_M;
 
+Model beach_M;
+Model tux_M;
+Model tuxAla_M;
+
+Model delfin_M;
+Model globo_M;
+
+Model suzanne_cuerpo_M;
+Model suzanne_pierna_M;
+Model suzanne_antebrazo_M;
+Model suzanne_brazo_M;
+
+Model condor_cuerpo_M;
+Model condor_muslo_M;
+Model condor_pierna_M;
+Model condor_antebrazo_M;
+Model condor_brazo_M;
+
 Model castillo;
 Model constMedio;
 Model constMedioChiquito;
@@ -156,6 +179,10 @@ Model chest_body;
 Model chest_key;
 
 Avatar *avatar;
+Tux *tux;
+Delfin *delfin;
+Suzanne *suzanne;
+Condor *condor;
 
 Skybox skybox;
 
@@ -693,7 +720,7 @@ int main()
 	palmera = Model();
 	palmera.LoadModel("Models/tulum/palmera.obj");
 	coco = Model();
-	coco.LoadModel("Models/coco/coco.obj");
+	coco.LoadModel("Models/coco.obj");
 	casaTux = Model();
 	casaTux.LoadModel("Models/casaTux.obj");
 	ring = Model();
@@ -710,7 +737,39 @@ int main()
 	chest_body.LoadModel("Models/chest_body.obj");
 	chest_key = Model();
 	chest_key.LoadModel("Models/chest_key.obj");
+
+        beach_M = Model();
+	beach_M.LoadModel("Models/beach.obj");
+        tux_M = Model();
+	tux_M.LoadModel("Models/tux-cuerpo.obj");
+        tuxAla_M = Model();
+	tuxAla_M.LoadModel("Models/tux-ala.obj");
 	
+        delfin_M = Model();
+	delfin_M.LoadModel("Models/delfin.obj");
+
+        globo_M = Model();
+	globo_M.LoadModel("Models/globo.obj");
+
+        suzanne_cuerpo_M = Model();
+	suzanne_cuerpo_M.LoadModel("Models/suzanne-cuerpo.obj");
+        suzanne_pierna_M = Model();
+	suzanne_pierna_M.LoadModel("Models/suzanne-pierna.obj");
+        suzanne_antebrazo_M = Model();
+	suzanne_antebrazo_M.LoadModel("Models/suzanne-antebrazo.obj");
+        suzanne_brazo_M = Model();
+	suzanne_brazo_M.LoadModel("Models/suzanne-brazo.obj");
+
+        condor_cuerpo_M = Model();
+	condor_cuerpo_M.LoadModel("Models/condor-cuerpo.obj");
+        condor_muslo_M = Model();
+	condor_muslo_M.LoadModel("Models/condor-muslo.obj");
+        condor_pierna_M = Model();
+	condor_pierna_M.LoadModel("Models/condor-pierna.obj");
+        condor_antebrazo_M = Model();
+	condor_antebrazo_M.LoadModel("Models/condor-antebrazo.obj");
+        condor_brazo_M = Model();
+	condor_brazo_M.LoadModel("Models/condor-brazo.obj");
 
 	std::vector<std::string> skyboxFaces;
 	skyboxFaces.push_back("Textures/Skybox/heather_rt.jpg");
@@ -735,7 +794,7 @@ int main()
 
 	//luz direccional, sólo 1 y siempre debe de existir
 	mainLight = DirectionalLight(1.0f, 1.0f, 1.0f,
-				     0.2f, 0.2f,
+				     0.5f, 0.5f,
 				     0.0f, 0.0f, -1.0f);
 	//contador de luces puntuales
 	unsigned int pointLightCount = 0;
@@ -858,15 +917,41 @@ int main()
 		return glm::vec3(40.0f * cos(t), 0.0f, 40.0f * sin(0.666f * t));
 	}));
 
+	delfin = new Delfin(&delfin_M, glm::vec3(-400.0f, 0.0f, 100.0f), [](GLfloat t) {
+		return glm::vec3(0.0f, 20 * sin(t) - 5.0f, 20.0f * cos(t));
+	});
+
+        movingEntities.push_back(new Globo(
+            &globo_M, glm::vec3(0.0f, 0.0f, 0.0f), [](GLfloat t) {
+		while (t > 120.0f) {
+			t -= 120.0f;
+		}
+
+		if (t <= 5.0f) {
+			return glm::vec3(300.0f, 30 * t, 0.0f);
+                } else if (t <= 55.0f) {
+			t -= 5.0f;
+			return glm::vec3(300.0f * cos(0.12566 * t), 160.0f + 15 * sin(t * 1.256), 300.0f * sin(0.12566 * t));
+                } else if (t <= 60.0f){
+			return glm::vec3(300.0f, 30 * (60 - t), 0.0f);
+		}
+
+		return glm::vec3(300.0f, 0.0f, 0.0f);
+	}));
+
+	movingEntities.push_back(delfin);
+
         avatar = new Avatar(&avatarCuerpo_M, &avatarMuslo_M, &avatarPierna_M, &avatarBrazo_M, &avatarAntebrazo_M, glm::vec3(0.0f, 0.0f, 2.0f));
 	avatar->startAnimation();
 
+
+
+
         camera.setAvatar(avatar);
 
-        camera.addLocation(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec2(0.0f, 0.0f));
-        camera.addLocation(glm::vec3(0.0f, 2.0f, 0.0f), glm::vec2(45.0f, 0.0f));
-        camera.addLocation(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec2(0.0f, 45.0f));
-        camera.addLocation(glm::vec3(2.0f, 0.0f, 0.0f), glm::vec2(0.0f, 90.0f));
+        camera.addLocation(glm::vec3(5.0f, 30.0f, 140.0f), glm::vec2(-20.0f, 0.0f));
+        camera.addLocation(glm::vec3(-225.0f, 20.0f, 125.0f), glm::vec2(-20.0f, -135.0f));
+        camera.addLocation(glm::vec3(-17.0f, 110.0f, -320.0f), glm::vec2(-27.0f, 30.0f));
 
 	// Lee los keyframes del archivo
 	// readKeyframes("keyframes-palmera.txt");
@@ -897,6 +982,15 @@ int main()
 	int ultimoRandom = 0;
 	int r = 0;
 	int k;
+
+	model = glm::translate(model, glm::vec3(-230.0f, 0.0f, 100.0f));
+	model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+	tux = new Tux(&tux_M, &tuxAla_M, model);
+
+	suzanne = new Suzanne(&suzanne_cuerpo_M, &suzanne_pierna_M, &suzanne_antebrazo_M, &suzanne_brazo_M, glm::mat4(1.0f));
+	condor = new Condor(&condor_cuerpo_M, &condor_muslo_M, &condor_pierna_M, &condor_antebrazo_M, &condor_brazo_M, glm::mat4(1.0f));
+
+        bool firstFrame = true;
 
 	// Loop mientras no se cierra la ventana
 	while (!mainWindow.getShouldClose())
@@ -980,6 +1074,8 @@ int main()
 		// }
 
 		model = glm::mat4(1.0);
+		model = glm::translate(model, glm::vec3(0.0f, 0.0f, 200.0f));
+		model = glm::scale(model, glm::vec3(-1.0f, 1.0f, -1.0f));
 		model = glm::translate(model, glm::vec3(-170.0f, -5.0f, 0.0f));
 		model = glm::rotate(model, 30 * toRadians, glm::vec3(0.0f, 1.0f, 0.0f));
 		model = glm::scale(model, glm::vec3(0.4f, 0.4f, 0.4f));
@@ -995,6 +1091,8 @@ int main()
 		smallCasaTux.RenderModel();
 
 		model = glm::mat4(1.0);
+		model = glm::translate(model, glm::vec3(0.0f, 0.0f, 200.0f));
+		model = glm::scale(model, glm::vec3(-1.0f, 1.0f, -1.0f));
 		model = glm::translate(model, glm::vec3(152.0f, -2.0f, 100.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		palmera.RenderModel();
@@ -1009,6 +1107,8 @@ int main()
 		}
 
 		model = glm::mat4(1.0);
+		model = glm::translate(model, glm::vec3(0.0f, 0.0f, 200.0f));
+		model = glm::scale(model, glm::vec3(-1.0f, 1.0f, -1.0f));
 		model = glm::translate(model, luces[0]);
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		lampara.RenderModel();
@@ -1026,6 +1126,8 @@ int main()
 
 
 		model = glm::mat4(1.0);
+		model = glm::translate(model, glm::vec3(0.0f, 0.0f, 200.0f));
+		model = glm::scale(model, glm::vec3(-1.0f, 1.0f, -1.0f));
 		model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
 		model = glm::rotate(model, 30 * toRadians, glm::vec3(0.0f, 1.0f, 0.0f));
 		model = glm::scale(model, glm::vec3(8.0f, 8.0f, 8.0f));
@@ -1034,6 +1136,8 @@ int main()
 		castillo.RenderModel();
 
 		model = glm::mat4(1.0);
+		model = glm::translate(model, glm::vec3(0.0f, 0.0f, 200.0f));
+		model = glm::scale(model, glm::vec3(-1.0f, 1.0f, -1.0f));
 		model = glm::translate(model, glm::vec3(0.0f, -5.0f, 0.0f));
 		model = glm::rotate(model, 30 * toRadians, glm::vec3(0.0f, 1.0f, 0.0f));
 		modelaux = model;
@@ -1045,6 +1149,13 @@ int main()
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		ring.RenderModel();
 
+                suzanne->setModel(model);
+		suzanne->update(dt);
+		suzanne->render(uniformModel);
+                condor->setModel(model);
+		condor->update(dt);
+		condor->render(uniformModel);
+
 		model = glm::translate(model, glm::vec3(35.0f, 2.0f, -8.0f));
 		model = glm::rotate(model, 60 * toRadians, glm::vec3(0.0f, 1.0f, 0.0f));
 		model = glm::scale(model, glm::vec3(0.1f, 0.1f, 0.1f));
@@ -1052,6 +1163,8 @@ int main()
 		santo.RenderModel();
 
 		model = glm::mat4(1.0);
+		model = glm::translate(model, glm::vec3(0.0f, 0.0f, 200.0f));
+		model = glm::scale(model, glm::vec3(-1.0f, 1.0f, -1.0f));
 		model = glm::translate(model, glm::vec3(0.0f, -1.0f, 0.0f));
 		model = glm::rotate(model, 30 * toRadians, glm::vec3(0.0f, 1.0f, 0.0f));
 		model = glm::scale(model, glm::vec3(8.0f, 8.0f, 8.0f));
@@ -1059,6 +1172,8 @@ int main()
 		esqIzq.RenderModel();
 
 		model = glm::mat4(1.0);
+		model = glm::translate(model, glm::vec3(0.0f, 0.0f, 200.0f));
+		model = glm::scale(model, glm::vec3(-1.0f, 1.0f, -1.0f));
 		model = glm::translate(model, glm::vec3(0.0f, -1.0f, 0.0f));
 		model = glm::rotate(model, 30 * toRadians, glm::vec3(0.0f, 1.0f, 0.0f));
 		model = glm::scale(model, glm::vec3(8.0f, 8.0f, 8.0f));
@@ -1067,6 +1182,8 @@ int main()
 		casitaIzq.RenderModel();
 
 		model = glm::mat4(1.0);
+		model = glm::translate(model, glm::vec3(0.0f, 0.0f, 200.0f));
+		model = glm::scale(model, glm::vec3(-1.0f, 1.0f, -1.0f));
 		model = glm::translate(model, glm::vec3(0.0f, -5.0f, 0.0f));
 		model = glm::rotate(model, 30 * toRadians, glm::vec3(0.0f, 1.0f, 0.0f));
 		model = glm::scale(model, glm::vec3(8.0f, 8.0f, 8.0f));
@@ -1075,6 +1192,8 @@ int main()
 		ruinasIzq.RenderModel();
 
 		model = glm::mat4(1.0);
+		model = glm::translate(model, glm::vec3(0.0f, 0.0f, 200.0f));
+		model = glm::scale(model, glm::vec3(-1.0f, 1.0f, -1.0f));
 		model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
 		model = glm::rotate(model, 30 * toRadians, glm::vec3(0.0f, 1.0f, 0.0f));
 		model = glm::scale(model, glm::vec3(8.0f, 8.0f, 8.0f));
@@ -1083,6 +1202,8 @@ int main()
 		esqIzqFrente.RenderModel();
 
 		model = glm::mat4(1.0);
+		model = glm::translate(model, glm::vec3(0.0f, 0.0f, 200.0f));
+		model = glm::scale(model, glm::vec3(-1.0f, 1.0f, -1.0f));
 		model = glm::translate(model, glm::vec3(0.0f, -1.0f, 0.0f));
 		model = glm::rotate(model, 30 * toRadians, glm::vec3(0.0f, 1.0f, 0.0f));
 		model = glm::scale(model, glm::vec3(8.0f, 8.0f, 8.0f));
@@ -1091,6 +1212,8 @@ int main()
 		cajaFrente.RenderModel();
 
 		model = glm::mat4(1.0);
+		model = glm::translate(model, glm::vec3(0.0f, 0.0f, 200.0f));
+		model = glm::scale(model, glm::vec3(-1.0f, 1.0f, -1.0f));
 		model = glm::translate(model, glm::vec3(0.0f, -1.0f, 0.0f));
 		model = glm::rotate(model, 30 * toRadians, glm::vec3(0.0f, 1.0f, 0.0f));
 		model = glm::scale(model, glm::vec3(8.0f, 8.0f, 8.0f));
@@ -1099,6 +1222,8 @@ int main()
 		constFrente.RenderModel();
 
 		model = glm::mat4(1.0);
+		model = glm::translate(model, glm::vec3(0.0f, 0.0f, 200.0f));
+		model = glm::scale(model, glm::vec3(-1.0f, 1.0f, -1.0f));
 		model = glm::translate(model, glm::vec3(0.0f, -1.0f, 0.0f));
 		model = glm::rotate(model, 30 * toRadians, glm::vec3(0.0f, 1.0f, 0.0f));
 		model = glm::scale(model, glm::vec3(8.0f, 8.0f, 8.0f));
@@ -1107,16 +1232,19 @@ int main()
 		explanadaDer.RenderModel();
 
 		model = glm::mat4(1.0);
+		model = glm::translate(model, glm::vec3(0.0f, 0.0f, 200.0f));
+		model = glm::scale(model, glm::vec3(-1.0f, 1.0f, -1.0f));
 		model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
 		model = glm::rotate(model, 30 * toRadians, glm::vec3(0.0f, 1.0f, 0.0f));
 		model = glm::scale(model, glm::vec3(8.0f, 8.0f, 8.0f));
 		modelaux = model;
 		// model = glm::rotate(model, -90 * toRadians, glm::vec3(1.0f, 0.0f, 0.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-		roca.UseTexture();
 		esqDer.RenderModel();
 
 		model = glm::mat4(1.0);
+		model = glm::translate(model, glm::vec3(0.0f, 0.0f, 200.0f));
+		model = glm::scale(model, glm::vec3(-1.0f, 1.0f, -1.0f));
 		model = glm::translate(model, glm::vec3(0.0f, -1.0f, 0.0f));
 		model = glm::rotate(model, 30 * toRadians, glm::vec3(0.0f, 1.0f, 0.0f));
 		model = glm::scale(model, glm::vec3(8.0f, 8.0f, 8.0f));
@@ -1126,6 +1254,8 @@ int main()
 		constMedioChiquito.RenderModel();
 	
 		model = glm::mat4(1.0);
+		model = glm::translate(model, glm::vec3(0.0f, 0.0f, 200.0f));
+		model = glm::scale(model, glm::vec3(-1.0f, 1.0f, -1.0f));
 		model = glm::translate(model, glm::vec3(0.0f, -1.0f, 0.0f));
 		model = glm::rotate(model, 30 * toRadians, glm::vec3(0.0f, 1.0f, 0.0f));
 		model = glm::scale(model, glm::vec3(8.0f, 8.0f, 8.0f));
@@ -1141,18 +1271,17 @@ int main()
 		model = glm::rotate(model, 90 * toRadians, glm::vec3(0.0f, 1.0f, 0.0f));
 		model = glm::scale(model, glm::vec3(8.0f, 8.0f, 8.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-		race.UseTexture();
 		racecourse.RenderModel();
 
 
 		//cofre con keyframe
 		model = glm::mat4(1.0);
       
+		model = glm::scale(model, glm::vec3(-1.0f, 1.0f, -1.0f));
 		model = glm::translate(model, glm::vec3(-50.0f, 0.0f, 140.0f));
 		model = glm::rotate(model, 180 * toRadians, glm::vec3(0.0f, 1.0f, 0.0f));
 		model = glm::scale(model, glm::vec3(5.0f, 5.0f, 5.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-		chest.UseTexture();
 		chest_body.RenderModel();
 		model = glm::translate(model, glm::vec3(0.0f, 1.1f, -0.7f));
 	
@@ -1166,7 +1295,6 @@ int main()
 		modelaux = model;
 		model = glm::rotate(model, giroCofre * toRadians, glm::vec3(-1.0f, 0.0f, 0.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-		chest.UseTexture();
 		chest_lid.RenderModel();
 
 		model = modelaux;
@@ -1182,20 +1310,49 @@ int main()
 
 		model = modelaux;
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-		chest.UseTexture();
 		chest_key.RenderModel();
+
 
 
 		color = glm::vec3(1.0f, 1.0f, 1.0f);
 		glUniform3fv(uniformColor, 1, glm::value_ptr(color));
 
                 for (auto entity : movingEntities) {
-			entity->update(dt);
+			if (!firstFrame) {
+				entity->update(dt);
+			}
 			entity->render(uniformModel);
 		}
 
 		avatar->update(dt);
 		avatar->render(uniformModel);
+
+                if (!tux->getAnimating() && mainWindow.getReiniciaTux()) {
+			tux->startAnimation();
+		}
+
+                if (!delfin->getAnimating() && mainWindow.getReiniciaDelfin()) {
+			delfin->restartAnim();
+		}
+
+                if (!condor->getAnimating() && mainWindow.getReiniciaCondor()) {
+			condor->startAnimation();
+		}
+
+                if (!suzanne->getAnimating() && mainWindow.getReiniciaSuzanne()) {
+			suzanne->startAnimation();
+		}
+
+
+                tux->update(dt);
+                tux->render(uniformModel);
+
+		model = glm::mat4(1.0);
+		model = model * tux->getModel();
+		model = glm::translate(model, glm::vec3(3.0f, -1.0f, 0.0f));
+		model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		beach_M.RenderModel();
 
 		model = glm::mat4(1.0);
 		model = glm::translate(model, glm::vec3(0.0f, -2.0f, -50.0f));
@@ -1281,6 +1438,8 @@ int main()
 		glUseProgram(0);
 
 		mainWindow.swapBuffers();
+
+                firstFrame = false;
 	}
 
 	return 0;

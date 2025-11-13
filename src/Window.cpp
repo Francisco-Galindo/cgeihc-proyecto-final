@@ -270,20 +270,41 @@ void Window::ManejaTeclado(GLFWwindow* window, int key, int code, int action, in
 		theWindow->camera->goToNextLocation();
 	}
 
-	if (key == GLFW_KEY_I) {
-		theWindow->prendeDiablo = true;
+        if (key == GLFW_KEY_I && action == GLFW_PRESS) {
+		theWindow->reiniciaCondor = true;
+        } else {
+		theWindow->reiniciaCondor = false;
 	}
-	if (key == GLFW_KEY_O) {
-		theWindow->prendeDiablo = false;
+
+        if (key == GLFW_KEY_O && action == GLFW_PRESS) {
+		theWindow->reiniciaSuzanne = true;
+        } else {
+		theWindow->reiniciaSuzanne = false;
 	}
 
 
-        if (key == GLFW_KEY_Y) {
-		theWindow->prendePoste = true;
+        if (key == GLFW_KEY_Y && action == GLFW_PRESS) {
+		theWindow->reiniciaTux = true;
         }
-        if (key == GLFW_KEY_U) {
-		theWindow->prendePoste = false;
+
+        if (key == GLFW_KEY_Y && action == GLFW_RELEASE) {
+		theWindow->reiniciaTux = false;
 	}
+
+        if (key == GLFW_KEY_U && action == GLFW_PRESS) {
+		theWindow->reiniciaDelfin = true;
+        }
+        if (key == GLFW_KEY_U && action == GLFW_RELEASE) {
+		theWindow->reiniciaDelfin = false;
+	}
+
+        if (key == GLFW_KEY_T && action == GLFW_PRESS) {
+		glm::vec3 p = theWindow->camera->getCameraPosition();
+                GLfloat pitch = theWindow->camera->getPitch();
+                GLfloat yaw = theWindow->camera->getYaw();
+		printf("Pos: %f %f %f\n", p.x, p.y, p.z);
+		printf("Dir: %f %f\n", pitch, yaw);
+        }
 
 	// Puerta
         if (key == GLFW_KEY_N) {

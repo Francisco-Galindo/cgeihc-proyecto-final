@@ -29,6 +29,8 @@ public:
 
 	glm::vec3 getCameraPosition();
 	glm::vec3 getCameraDirection();
+	GLfloat getPitch() { return pitch; };
+	GLfloat getYaw() { return yaw; };
 	CameraEstado getEstado() { return estado; };
 	glm::mat4 calculateViewMatrix();
 	void setAvatar(Avatar *avatar);

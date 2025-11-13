@@ -49,6 +49,10 @@ public:
 	bool getPrendePoste() { return prendePoste; }
 	bool getPrendeLuzCofre() { return articulacion5 != 0.0f; }
 	bool getAnimandoDado() { return animandoDado; }
+        bool getReiniciaTux() { return reiniciaTux; }
+        bool getReiniciaDelfin() { return reiniciaDelfin; }
+        bool getReiniciaCondor() { return reiniciaCondor; }
+        bool getReiniciaSuzanne() { return reiniciaSuzanne; }
 	GLfloat getDadoAng() { return dadoAng; }
 	GLfloat getDadoVel() { return dadoVel; }
 	glm::mat4 getDadoMat() { return dadoMat; }
@@ -89,6 +93,7 @@ private:
 	glm::mat4 dadoMat, oldDadoMat;
 	bool primerGiro, dadoEnAire;
 	bool mouseFirstMoved;
+	bool reiniciaTux, reiniciaDelfin, reiniciaSuzanne, reiniciaCondor;
 	void createCallbacks();
 	static void ManejaTeclado(GLFWwindow* window, int key, int code, int action, int mode);
 	static void ManejaMouse(GLFWwindow* window, double xPos, double yPos);
