@@ -94,6 +94,11 @@ Texture chest;
 
 Texture letreroTexture;
 
+Texture padock1;
+Texture padock2;
+Texture padock3;
+Texture padockLetter;
+
 Model Dado_M;
 
 Model Kitt_M;
@@ -178,6 +183,7 @@ Model lampara;
 Model chest_lid;
 Model chest_body;
 Model chest_key;
+Model padock;
 
 Model thunderbirdCuerpo_M;
 Model thunderbirdAla_M;
@@ -620,6 +626,15 @@ int main()
 	metal.LoadTextureA();
 	chest = Texture("Textures/chest.png");
 	chest.LoadTextureA();
+
+	padock1 = Texture("Textures/texture1.png");
+	padock1.LoadTextureA();
+	padock2 = Texture("Textures/texture2.png");
+	padock2.LoadTextureA();
+	padock3 = Texture("Textures/texture3.png");
+	padock3.LoadTextureA();
+	padockLetter = Texture("Textures/1.png");
+	padockLetter.LoadTextureA();
 
 
 	Lampara_M = Model();
@@ -1137,6 +1152,97 @@ int main()
 		}
 
 		model = glm::mat4(1.0);
+		model = glm::translate(model, glm::vec3(-182.0f, -2.0f, 100.0f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		palmera.RenderModel();
+
+
+
+
+		for (i = 0; i < 20; i++) {
+			model = glm::translate(model, arbol[i]);
+			glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+			bottom_Trunk.UseTexture();
+			palmera.RenderModel();
+
+
+		}
+
+
+
+		model = glm::mat4(1.0);
+		model = glm::translate(model, glm::vec3(-40.0f, -2.0f, -170.0f));
+		model = glm::rotate(model, 90 * toRadians, glm::vec3(0.0f, 1.0f, 0.0f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+
+		palmera.RenderModel();
+
+
+
+
+
+		for (i = 0; i < 20; i++) {
+			model = glm::translate(model, arbol[i]);
+			glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+			bottom_Trunk.UseTexture();
+
+			palmera.RenderModel();
+
+
+		}
+
+
+		model = glm::mat4(1.0);
+		model = glm::translate(model, glm::vec3(-40.0f, -2.0f, -190.0f));
+		model = glm::rotate(model, 270 * toRadians, glm::vec3(0.0f, 1.0f, 0.0f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		palmera.RenderModel();
+
+
+		for (i = 0; i < 20; i++) {
+
+			model = glm::translate(model, arbol[i]);
+
+			glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+			bottom_Trunk.UseTexture();
+			palmera.RenderModel();
+
+
+
+
+
+		}
+
+
+
+
+		model = glm::mat4(1.0);
+
+		model = glm::translate(model, glm::vec3(-60.0f, -2.0f, 220.0f));
+		model = glm::rotate(model, 270 * toRadians, glm::vec3(0.0f, 1.0f, 0.0f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+
+		palmera.RenderModel();
+
+
+		for (i = 0; i < 20; i++) {
+
+			model = glm::translate(model, arbol[i]);
+
+			glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+
+			bottom_Trunk.UseTexture();
+
+			palmera.RenderModel();
+
+
+		}
+
+
+		//fin palmeras
+
+
+		model = glm::mat4(1.0);
 		model = glm::translate(model, glm::vec3(0.0f, 0.0f, 200.0f));
 		model = glm::scale(model, glm::vec3(-1.0f, 1.0f, -1.0f));
 		model = glm::translate(model, luces[0]);
@@ -1357,7 +1463,7 @@ int main()
 		color = glm::vec3(1.0f, 1.0f, 1.0f);
 		glUniform3fv(uniformColor, 1, glm::value_ptr(color));
 
-                for (auto entity : movingEntities) {
+		for (auto entity : movingEntities) {
 			if (!firstFrame) {
 				entity->update(dt);
 			}
@@ -1415,6 +1521,40 @@ int main()
 		glUniform3fv(uniformColor, 1, glm::value_ptr(color));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Porticullis_M.RenderModel();
+
+		model = glm::mat4(1.0);
+
+		model = glm::translate(model, glm::vec3(-150.0f, -2.0f, -10.0f));
+		model = glm::rotate(model, glm::radians(270.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		modelaux = model;
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		color = glm::vec3(1.0f, 1.0f, 1.0f);
+
+		glUniform3fv(uniformColor, 1, glm::value_ptr(color));
+		Arco_M.RenderModel();
+
+
+		model = modelaux;
+		model = glm::translate(model, glm::vec3(-1.3f, 0.0f, 0.0));
+		model = glm::rotate(model, glm::radians(mainWindow.getarticulacion6()), glm::vec3(0.0f, 1.0f, 0.0f));
+		glUniform3fv(uniformColor, 1, glm::value_ptr(color));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Puerta_M.RenderModel();
+
+
+
+		model = modelaux;
+		model = glm::translate(model, mainWindow.getDeslizPos());
+		glUniform3fv(uniformColor, 1, glm::value_ptr(color));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Porticullis_M.RenderModel();
+
+
+		model = glm::mat4(1.0);
+		model = glm::translate(model, glm::vec3(0.0f, 0.0f, -150.0f));
+		model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		padock.RenderModel();
 
 		int numpapus = 9;
 		GLfloat angdif = 15.0f;
