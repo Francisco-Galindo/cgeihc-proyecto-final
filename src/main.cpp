@@ -1022,6 +1022,67 @@ int main()
 
 		}
 
+				model = glm::mat4(1.0);
+		model = glm::translate(model, glm::vec3(-182.0f, -2.0f, 100.0f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		palmera.RenderModel();
+
+
+		for (i = 0; i < 20; i++) {
+			model = glm::translate(model, arbol[i]);
+			glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+			bottom_Trunk.UseTexture();
+			palmera.RenderModel();
+
+		}
+
+		model = glm::mat4(1.0);
+		model = glm::translate(model, glm::vec3(-40.0f, -2.0f, -170.0f));
+		model = glm::rotate(model, 90 * toRadians, glm::vec3(0.0f, 1.0f, 0.0f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		palmera.RenderModel();
+
+
+		for (i = 0; i < 20; i++) {
+			model = glm::translate(model, arbol[i]);
+			glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+			bottom_Trunk.UseTexture();
+			palmera.RenderModel();
+
+		}
+
+		model = glm::mat4(1.0);
+		model = glm::translate(model, glm::vec3(-40.0f, -2.0f, -190.0f));
+		model = glm::rotate(model, 270 * toRadians, glm::vec3(0.0f, 1.0f, 0.0f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		palmera.RenderModel();
+
+
+		for (i = 0; i < 20; i++) {
+			model = glm::translate(model, arbol[i]);
+			glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+			bottom_Trunk.UseTexture();
+			palmera.RenderModel();
+
+		}
+
+		model = glm::mat4(1.0);
+		model = glm::translate(model, glm::vec3(-60.0f, -2.0f, 220.0f));
+		model = glm::rotate(model, 270 * toRadians, glm::vec3(0.0f, 1.0f, 0.0f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		palmera.RenderModel();
+
+
+		for (i = 0; i < 20; i++) {
+			model = glm::translate(model, arbol[i]);
+			glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+			bottom_Trunk.UseTexture();
+			palmera.RenderModel();
+
+		}
+
+		//fin palmeras
+
 		model = glm::mat4(1.0);
 		model = glm::translate(model, luces[0]);
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
