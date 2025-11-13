@@ -1,26 +1,28 @@
 ﻿/*
-Animación:
-Simple o básica:Por banderas y condicionales (más de 1 transformación geométrica se ve modificada)
-Compleja: Por medio de funciones y algoritmos.
-Textura Animada
+ Proyecto final para Computación Gráfica e Interacción Humano - Computadora
 */
-//para cargar imagen
-#define STB_IMAGE_IMPLEMENTATION
 
+//para cargar imagen
+#include "Avatar.hpp"
+#include "MovingEntity.hpp"
+#define STB_IMAGE_IMPLEMENTATION
+#define _CRT_SECURE_NO_WARNINGS
 #include <stdio.h>
 #include <string.h>
 #include <cmath>
 #include <vector>
+#include <cerrno>
 #include <math.h>
 #include <stdlib.h>
 
+#include <GL/glew.h>
+#include <GLFW/glfw3.h>
 
-#include <glew.h>
-#include <glfw3.h>
-
-#include <glm.hpp>
-#include <gtc\matrix_transform.hpp>
-#include <gtc\type_ptr.hpp>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+//para probar el importer
+//#include<assimp/Importer.hpp>
 
 #include "Window.h"
 #include "Mesh.h"
@@ -30,6 +32,8 @@ Textura Animada
 #include "Sphere.h"
 #include"Model.h"
 #include "Skybox.h"
+#include "Beastie.hpp"
+#include "Xue.hpp"
 
 //para iluminación
 #include "CommonValues.h"
@@ -37,7 +41,6 @@ Textura Animada
 #include "PointLight.h"
 #include "SpotLight.h"
 #include "Material.h"
-
 const float toRadians = 3.14159265f / 180.0f;
 
 //variables para animación
