@@ -74,10 +74,10 @@ Skybox::Skybox(std::vector<std::string> faceLocations)
 
 }
 
-void Skybox::DrawSkybox(glm::mat4 viewMatrix, glm::mat4 projectionMatrix)
+void Skybox::DrawSkybox(glm::mat4 viewMatrix, glm::mat4 projectionMatrix, GLfloat hora)
 {
 	viewMatrix = glm::mat4(glm::mat3(viewMatrix));
-	ang = (6.28 / 120.0) * glfwGetTime() + 1.57f;
+	ang = (6.28 / 120.0) * (float)hora + 1.57f;
 	cosang = std::max((cos(ang) + 1.0f) / 2.0f, 0.125);
 	float cosang2 = std::max((float)cosang, 0.25f);
 	colorMod = glm::vec4(cosang, cosang2, cosang2, 1.0f);

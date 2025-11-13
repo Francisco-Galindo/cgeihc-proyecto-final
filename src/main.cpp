@@ -809,7 +809,7 @@ int main()
 	unsigned int pointLightCount = 0;
 	//Declaración de primer luz puntual
 
-        int luz = 15;
+        int luz = 12;
     
 	for (int i = 0; i < luz; i++) {
 		pointLights[i] = PointLight(1.0f, 1.0f, 1.0f,
@@ -865,12 +865,18 @@ int main()
 	// 	1.0f, 0.001f, 0.001f,
 	// 	20.0f);
 
-	// faroTrasero = SpotLight(0.0f, 1.0f, 1.0f,
-	// 	1.0f, 0.2f,
-	// 	5.0f, 10.0f, 0.0f,
-	// 	2.0f, 0.0f, 0.0f,
-	// 	1.0f, 0.001f, 0.001f,
-	// 	20.0f);
+	SpotLight faro1 = SpotLight(0.75f, 1.0f, 0.7f,
+		0.3f, 0.3f,
+		5.0f, 10.0f, 0.0f,
+		2.0f, 0.0f, 0.0f,
+		1.0f, 0.001f, 0.001f,
+		20.0f);
+	SpotLight faro2 = SpotLight(0.5f, 1.0f, 0.5f,
+		0.2f, 0.2f,
+		5.0f, 10.0f, 0.0f,
+		2.0f, 0.0f, 0.0f,
+		1.0f, 0.001f, 0.001f,
+		20.0f);
 
 	// luzCofre = SpotLight(0.25f, 1.0f, 0.0f,
 	// 	1.0f, 2.0f,
@@ -913,9 +919,15 @@ int main()
 
 	std::vector<MovingEntity*> movingEntities;
 
+// Pos: 153.167160 41.381664 -228.169876
+// Dir: -21.500000 71.000000
 
-        movingEntities.push_back(new Beastie(&beastieCarro_M, &beastieCarroLlantaTras_M, &beastieCarroLlantaDel_M, glm::vec3(0.0f), [](GLfloat t) {
+        movingEntities.push_back(new Beastie(&beastieCarro_M, &beastieCarroLlantaTras_M, &beastieCarroLlantaDel_M, glm::vec3(150.0f, 0.0f, -230.0f), [](GLfloat t) {
 		return glm::vec3(20.0f * cos(t), 0.0f, 50.0f * sin(0.666f * t));
+	}));
+
+	movingEntities.push_back(new Xue(&XueCarro_M, &XuePaleta_M, &XueTurbina_M, glm::vec3(160.0f, 0.0f, -240.0f), [](GLfloat t) {
+		return glm::vec3(40.0f * cos(t), 0.0f, 40.0f * sin(0.666f * t));
 	}));
 
         movingEntities.push_back(new Thunderbird(&thunderbirdCuerpo_M, &thunderbirdAla_M, glm::vec3(0.0f), [](GLfloat t) {
@@ -926,9 +938,6 @@ int main()
 		return glm::vec3(40.0f * cos(t), 75.0f + 20.0f * sin(t), 100.0f * sin(0.666f * t));
 	}));
 
-        movingEntities.push_back(new Xue(&XueCarro_M, &XuePaleta_M, &XueTurbina_M, glm::vec3(0.0f), [](GLfloat t) {
-		return glm::vec3(40.0f * cos(t), 0.0f, 40.0f * sin(0.666f * t));
-	}));
 
 	delfin = new Delfin(&delfin_M, glm::vec3(-400.0f, 0.0f, 100.0f), [](GLfloat t) {
 		return glm::vec3(0.0f, 20 * sin(t) - 5.0f, 20.0f * cos(t));
@@ -1004,6 +1013,7 @@ int main()
 	condor = new Condor(&condor_cuerpo_M, &condor_muslo_M, &condor_pierna_M, &condor_antebrazo_M, &condor_brazo_M, glm::mat4(1.0f));
 
         bool firstFrame = true;
+	GLfloat hora = 60.0f;
 
 	// Loop mientras no se cierra la ventana
 	while (!mainWindow.getShouldClose())
@@ -1013,6 +1023,13 @@ int main()
 		deltaTime = dt;
 		deltaTime += (now - lastTime) / limitFPS;
 		lastTime = now;
+
+                if (!firstFrame) {
+			hora += dt;
+		}
+                if (hora >= 120.0f) {
+			hora -= 120.0f;
+		}
 
 		mainWindow.UpdatePos(dt);
 
@@ -1035,7 +1052,7 @@ int main()
 		// Clear the window
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		skybox.DrawSkybox(camera.calculateViewMatrix(), projection);
+		skybox.DrawSkybox(camera.calculateViewMatrix(), projection, hora);
 		shaderList[0].UseShader();
 		uniformModel = shaderList[0].GetModelLocation();
 		uniformProjection = shaderList[0].GetProjectionLocation();
@@ -1128,15 +1145,25 @@ int main()
 		luz_position = glm::vec3(model[3][0], model[3][1]+5, model[3][2]);
 		pointLights[0].SetPos(luz_position);
 
+			
+		int t = glfwGetTime();
 		for (k = 1; k < luz; k++) {
 			model = glm::translate(model, luces[k]);
 			glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 			lampara.RenderModel();
-			luz_position = glm::vec3(model[3][0], model[3][1] + 5, model[3][2]);
-			pointLights[k].SetPos(luz_position);
-			pointLights[pointLightCount++] = pointLights[k];
+			if (hora < 60.0f) {
+				luz_position = glm::vec3(model[3][0], model[3][1] + 5, model[3][2]);
+				pointLights[k].SetPos(luz_position);
+				pointLights[pointLightCount++] = pointLights[k];
+			}
 		}
 
+		if (hora < 60.0f) {
+			faro1.SetFlash(movingEntities[0]->getPos(), movingEntities[0]->getDiff());
+			faro2.SetFlash(movingEntities[1]->getPos(), movingEntities[1]->getDiff());
+			spotLights[spotLightCount++] = faro1;
+			spotLights[spotLightCount++] = faro2;
+		}
 
 		model = glm::mat4(1.0);
 		model = glm::translate(model, glm::vec3(0.0f, 0.0f, 200.0f));
@@ -1281,7 +1308,7 @@ int main()
 
 		model = glm::mat4(1.0);
 		model = glm::translate(model, glm::vec3(100.0f, 0.0f, -200.0f));
-		model = glm::rotate(model, 90 * toRadians, glm::vec3(0.0f, 1.0f, 0.0f));
+		model = glm::rotate(model, 180 * toRadians, glm::vec3(0.0f, 1.0f, 0.0f));
 		model = glm::scale(model, glm::vec3(8.0f, 8.0f, 8.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		racecourse.RenderModel();
@@ -1432,7 +1459,8 @@ int main()
 		}
 
 		glm::vec4 dir = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
-		glm::mat4 papu = glm::rotate(glm::mat4(1.0f), (6.28f / 120.0f) * (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
+		float ang = (6.28 / 120.0) * hora;
+		glm::mat4 papu = glm::rotate(glm::mat4(1.0f), ang, glm::vec3(0.0f, 0.0f, 1.0f));
 		dir = papu * dir;
 		mainLight.SetDir(dir);
 		//información al shader de fuentes de iluminación

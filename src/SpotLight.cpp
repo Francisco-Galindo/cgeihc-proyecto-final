@@ -43,7 +43,7 @@ void SpotLight::UseLight(GLuint ambientIntensityLocation, GLuint ambientColourLo
 void SpotLight::SetFlash(glm::vec3 pos, glm::vec3 dir)
 {
 	position = pos;
-	direction = dir;
+	direction = glm::normalize(dir);
 }
 
 void SpotLight::SetPos(glm::vec3 pos)
