@@ -7,6 +7,7 @@
 #include "Delfin.hpp"
 #include "Globo.hpp"
 #include "Suzanne.hpp"
+#include "Thunderbird.hpp"
 #define STB_IMAGE_IMPLEMENTATION
 
 #include <stdio.h>
@@ -32,7 +33,7 @@
 #include "Camera.h"
 #include "Texture.h"
 #include "Sphere.h"
-#include"Model.h"
+#include "Model.h"
 #include "Skybox.h"
 #include "Beastie.hpp"
 #include "Xue.hpp"
@@ -177,6 +178,9 @@ Model lampara;
 Model chest_lid;
 Model chest_body;
 Model chest_key;
+
+Model thunderbirdCuerpo_M;
+Model thunderbirdAla_M;
 
 Avatar *avatar;
 Tux *tux;
@@ -771,6 +775,11 @@ int main()
         condor_brazo_M = Model();
 	condor_brazo_M.LoadModel("Models/condor-brazo.obj");
 
+        thunderbirdCuerpo_M = Model();
+	thunderbirdCuerpo_M.LoadModel("Models/thunderbird-cuerpo.obj");
+        thunderbirdAla_M = Model();
+	thunderbirdAla_M.LoadModel("Models/thunderbird-ala.obj");
+
 	std::vector<std::string> skyboxFaces;
 	skyboxFaces.push_back("Textures/Skybox/heather_rt.jpg");
 	skyboxFaces.push_back("Textures/Skybox/heather_lf.jpg");
@@ -909,7 +918,11 @@ int main()
 		return glm::vec3(20.0f * cos(t), 0.0f, 50.0f * sin(0.666f * t));
 	}));
 
-        movingEntities.push_back(new Beastie(&beastieCarro_M, &beastieCarroLlantaTras_M, &beastieCarroLlantaDel_M, glm::vec3(0.0f), [](GLfloat t) {
+        movingEntities.push_back(new Thunderbird(&thunderbirdCuerpo_M, &thunderbirdAla_M, glm::vec3(0.0f), [](GLfloat t) {
+		return glm::vec3(40.0f * cos(t), 75.0f + 20.0f * sin(t), 100.0f * sin(0.666f * t));
+	}));
+
+        movingEntities.push_back(new Thunderbird(&thunderbirdCuerpo_M, &thunderbirdAla_M, glm::vec3(200.0f, 0.0f, 200.0f), [](GLfloat t) {
 		return glm::vec3(40.0f * cos(t), 75.0f + 20.0f * sin(t), 100.0f * sin(0.666f * t));
 	}));
 
