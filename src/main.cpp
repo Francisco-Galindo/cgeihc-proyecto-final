@@ -1432,7 +1432,7 @@ int main()
 		}
 
 		glm::vec4 dir = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
-		glm::mat4 papu = glm::rotate(glm::mat4(1.0f), (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
+		glm::mat4 papu = glm::rotate(glm::mat4(1.0f), (6.28f / 120.0f) * (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
 		dir = papu * dir;
 		mainLight.SetDir(dir);
 		//información al shader de fuentes de iluminación
