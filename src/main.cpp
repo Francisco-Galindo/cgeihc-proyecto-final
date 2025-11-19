@@ -1695,23 +1695,18 @@ int main()
 	}
 
 
+	// Cierra elementos de audio
 	alDeleteSources(1,&alSource);
-
-	//delete our buffer
-	alDeleteBuffers(1,&alSampleSet);
+	alDeleteSources(1,&alSource2);
 
 	context=alcGetCurrentContext();
 
-	//Get device for active context
 	device=alcGetContextsDevice(context);
 
-	//Disable context
 	alcMakeContextCurrent(NULL);
 
-	//Release context(s)
 	alcDestroyContext(context);
 
-	//Close device
 	alcCloseDevice(device);
 
 	return 0;
