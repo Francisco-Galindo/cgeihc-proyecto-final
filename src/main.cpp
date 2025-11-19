@@ -21,6 +21,10 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
+#include <AL/al.h>
+#include <AL/alut.h>
+#include <AL/alc.h>
+
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -581,6 +585,76 @@ void animate(void)
 
 int main()
 {
+
+	ALCcontext *context;
+	ALCdevice *device;
+
+	device = alcOpenDevice(NULL);
+        if (device == nullptr) {
+		fprintf(stderr, "No se pudo abrir el dispositivo de audio: %d...\n", alGetError());
+	}
+
+
+        context = alcCreateContext(device, NULL);
+	alcMakeContextCurrent(context);
+
+        alGetError();
+
+	char*     alBuffer;             //data for the buffer
+	ALenum alFormatBuffer;    //buffer format
+	ALsizei   alFreqBuffer;       //frequency
+	long       alBufferLen;        //bit depth
+	ALboolean    alLoop;         //loop
+	unsigned int alSource;      //source
+	unsigned int alSampleSet;
+
+	//load the wave file
+	alutLoadWAVFile((ALbyte *)"./audio/hacienda.wav",&alFormatBuffer, (void **) &alBuffer,(ALsizei *)&alBufferLen, &alFreqBuffer, &alLoop);
+
+	//create a source
+	alGenSources(1, &alSource);
+
+	//create  buffer
+	alGenBuffers(1, &alSampleSet);
+
+	//put the data into our sampleset buffer
+	alBufferData(alSampleSet, alFormatBuffer, alBuffer, alBufferLen, alFreqBuffer);
+
+	//assign the buffer to this source
+	alSourcei(alSource, AL_BUFFER, alSampleSet);
+
+	//release the data
+	alutUnloadWAV(alFormatBuffer, alBuffer, alBufferLen, alFreqBuffer);
+
+
+
+	char*     alBuffer2;             //data for the buffer
+	ALenum alFormatBuffer2;    //buffer format
+	ALsizei   alFreqBuffer2;       //frequency
+	long       alBufferLen2;        //bit depth
+	ALboolean    alLoop2;         //loop
+	unsigned int alSource2;      //source
+	unsigned int alSampleSet2;
+
+	//load the wave file
+	alutLoadWAVFile((ALbyte *)"./audio/golpe.wav",&alFormatBuffer2, (void **) &alBuffer2,(ALsizei *)&alBufferLen2, &alFreqBuffer2, &alLoop2);
+
+	//create a source
+	alGenSources(1, &alSource2);
+
+	//create  buffer
+	alGenBuffers(1, &alSampleSet2);
+
+	//put the data into our sampleset buffer
+	alBufferData(alSampleSet2, alFormatBuffer2, alBuffer2, alBufferLen2, alFreqBuffer2);
+
+	//assign the buffer to this source
+	alSourcei(alSource2, AL_BUFFER, alSampleSet2);
+
+	//release the data
+	alutUnloadWAV(alFormatBuffer2, alBuffer2, alBufferLen2, alFreqBuffer2);
+
+
 	// mainWindow = Window(1366, 768); // 1280, 1024 or 1024, 768
 	mainWindow = Window(1920, 1080); // 1280, 1024 or 1024, 768
 	mainWindow.Initialise();
@@ -1029,6 +1103,13 @@ int main()
 
         bool firstFrame = true;
 	GLfloat hora = 60.0f;
+
+	float gain = 0.25f;
+	alSourcef(alSource, AL_GAIN, gain);
+        alSourcei(alSource, AL_LOOPING, AL_TRUE);
+
+        alSourcePlay(alSource);
+
 
 	// Loop mientras no se cierra la ventana
 	while (!mainWindow.getShouldClose())
@@ -1483,14 +1564,21 @@ int main()
 
                 if (!condor->getAnimating() && mainWindow.getReiniciaCondor()) {
 			condor->startAnimation();
+			alSourcei(alSource2, AL_LINEAR_DISTANCE, AL_TRUE);
+
+			alSourcePlay(alSource2);
 		}
 
                 if (!suzanne->getAnimating() && mainWindow.getReiniciaSuzanne()) {
 			suzanne->startAnimation();
+
+			alSourcei(alSource2, AL_LINEAR_DISTANCE, AL_TRUE);
+
+			alSourcePlay(alSource2);
 		}
 
 
-                tux->update(dt);
+		tux->update(dt);
                 tux->render(uniformModel);
 
 		model = glm::mat4(1.0);
@@ -1622,6 +1710,26 @@ int main()
 
                 firstFrame = false;
 	}
+
+
+	alDeleteSources(1,&alSource);
+
+	//delete our buffer
+	alDeleteBuffers(1,&alSampleSet);
+
+	context=alcGetCurrentContext();
+
+	//Get device for active context
+	device=alcGetContextsDevice(context);
+
+	//Disable context
+	alcMakeContextCurrent(NULL);
+
+	//Release context(s)
+	alcDestroyContext(context);
+
+	//Close device
+	alcCloseDevice(device);
 
 	return 0;
 }
