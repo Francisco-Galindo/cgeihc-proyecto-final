@@ -586,6 +586,14 @@ void animate(void)
 int main()
 {
 
+
+	if (!alutInit (NULL, NULL)) {
+		ALenum error = alutGetError ();
+		fprintf (stderr, "%s\n", alutGetErrorString (error));
+		exit (EXIT_FAILURE);
+	}
+
+
 	ALCcontext *context;
 	ALCdevice *device;
 
@@ -600,59 +608,34 @@ int main()
 
         alGetError();
 
-	char*     alBuffer;             //data for the buffer
-	ALenum alFormatBuffer;    //buffer format
-	ALsizei   alFreqBuffer;       //frequency
-	long       alBufferLen;        //bit depth
-	ALboolean    alLoop;         //loop
+	ALenum error;
+	ALuint     alBuffer;             //data for the buffer
 	unsigned int alSource;      //source
-	unsigned int alSampleSet;
-
-	//load the wave file
-	alutLoadWAVFile((ALbyte *)"./audio/hacienda.wav",&alFormatBuffer, (void **) &alBuffer,(ALsizei *)&alBufferLen, &alFreqBuffer, &alLoop);
-
-	//create a source
-	alGenSources(1, &alSource);
-
-	//create  buffer
-	alGenBuffers(1, &alSampleSet);
-
-	//put the data into our sampleset buffer
-	alBufferData(alSampleSet, alFormatBuffer, alBuffer, alBufferLen, alFreqBuffer);
-
-	//assign the buffer to this source
-	alSourcei(alSource, AL_BUFFER, alSampleSet);
-
-	//release the data
-	alutUnloadWAV(alFormatBuffer, alBuffer, alBufferLen, alFreqBuffer);
-
-
-
-	char*     alBuffer2;             //data for the buffer
-	ALenum alFormatBuffer2;    //buffer format
-	ALsizei   alFreqBuffer2;       //frequency
-	long       alBufferLen2;        //bit depth
-	ALboolean    alLoop2;         //loop
+	ALuint     alBuffer2;             //data for the buffer
 	unsigned int alSource2;      //source
-	unsigned int alSampleSet2;
 
-	//load the wave file
-	alutLoadWAVFile((ALbyte *)"./audio/golpe.wav",&alFormatBuffer2, (void **) &alBuffer2,(ALsizei *)&alBufferLen2, &alFreqBuffer2, &alLoop2);
+	alBuffer = alutCreateBufferFromFile("./audio/hacienda.wav");
+	if (alBuffer == AL_NONE) {
+		error = alutGetError ();
+		fprintf (stderr, "Error loading file: '%s'\n",
+			 alutGetErrorString (error));
+		alutExit ();
+		exit (EXIT_FAILURE);
+	}
+	alGenSources (1, &alSource);
+	alSourcei (alSource, AL_BUFFER, alBuffer);
 
-	//create a source
-	alGenSources(1, &alSource2);
 
-	//create  buffer
-	alGenBuffers(1, &alSampleSet2);
-
-	//put the data into our sampleset buffer
-	alBufferData(alSampleSet2, alFormatBuffer2, alBuffer2, alBufferLen2, alFreqBuffer2);
-
-	//assign the buffer to this source
-	alSourcei(alSource2, AL_BUFFER, alSampleSet2);
-
-	//release the data
-	alutUnloadWAV(alFormatBuffer2, alBuffer2, alBufferLen2, alFreqBuffer2);
+	alBuffer2 = alutCreateBufferFromFile("./audio/golpe.wav");
+	if (alBuffer2 == AL_NONE) {
+		error = alutGetError ();
+		fprintf (stderr, "Error loading file: '%s'\n",
+			 alutGetErrorString (error));
+		alutExit ();
+		exit (EXIT_FAILURE);
+	}
+	alGenSources (1, &alSource2);
+	alSourcei (alSource2, AL_BUFFER, alBuffer2);
 
 
 	// mainWindow = Window(1366, 768); // 1280, 1024 or 1024, 768
