@@ -56,8 +56,8 @@ float toffsetnumerov = 0.0f;
 float toffsetnumerocambiau = 0.0;
 float angulovaria = 0.0f;
 float dragonavance = 0.0f;
-float reproduciranimacion, habilitaranimacion, guardoFrame, reinicioFrame, 
-ciclo, ciclo2, ciclo3, ciclo4,ciclo5,ciclo6,ciclo7,ciclo8, ciclo9,ciclo0, contador = 0;
+float reproduciranimacion, habilitaranimacion, guardoFrame, reinicioFrame,
+ciclo, ciclo2, ciclo3, ciclo4, ciclo5, ciclo6, ciclo7, ciclo8, ciclo9, ciclo0, contador = 0;
 int i, a = 20;
 bool manejoAni = false;
 
@@ -85,14 +85,23 @@ Texture wood;
 Texture plateado;
 Texture metal;
 Texture chest;
+Texture cara;
+
+Texture letreroTexture;
+
 Texture padock1;
 Texture padock2;
 Texture padock3;
 Texture padockLetter;
 
-Texture letreroTexture;
+Texture ballcourt1;
+Texture ballcourt2;
+Texture ballcourt3;
+Texture ballcourt4;
+Texture ballcourt5;
+Texture ballcourt6;
 
-Model Dado_M;
+
 
 Model Kitt_M;
 Model Llanta_M;
@@ -128,13 +137,30 @@ Model EsqIzqFrente_M;
 Model esqIzq_M;
 Model explanadaDer_M;
 Model ruinasIzq_M;
-Model padock;
 
 Model avatarCuerpo_M;
 Model avatarBrazo_M;
 Model avatarAntebrazo_M;
 Model avatarMuslo_M;
 Model avatarPierna_M;
+
+Model beach_M;
+Model tux_M;
+Model tuxAla_M;
+
+Model delfin_M;
+Model globo_M;
+
+Model suzanne_cuerpo_M;
+Model suzanne_pierna_M;
+Model suzanne_antebrazo_M;
+Model suzanne_brazo_M;
+
+Model condor_cuerpo_M;
+Model condor_muslo_M;
+Model condor_pierna_M;
+Model condor_antebrazo_M;
+Model condor_brazo_M;
 
 Model castillo;
 Model constMedio;
@@ -159,8 +185,19 @@ Model lampara;
 Model chest_lid;
 Model chest_body;
 Model chest_key;
+Model padock;
 
-Avatar *avatar;
+Model thunderbirdCuerpo_M;
+Model thunderbirdAla_M;
+
+Model ballcourt_M;
+
+
+Avatar* avatar;
+Tux* tux;
+Delfin* delfin;
+Suzanne* suzanne;
+Condor* condor;
 
 Skybox skybox;
 
@@ -294,16 +331,16 @@ void CreateObjects()
 		0.5f, 0.0f, 0.0f,	0.125f, 0.875f,	0.0f, 0.0f, -1.0f,
 		-0.5f, 0.0f, 0.0f,	0.0f, 0.875f,	0.0f, 0.0f, -1.0f,
 	};
-	
-	Mesh *obj1 = new Mesh();
+
+	Mesh* obj1 = new Mesh();
 	obj1->CreateMesh(vertices, indices, 32, 12);
 	meshList.push_back(obj1);
 
-	Mesh *obj2 = new Mesh();
+	Mesh* obj2 = new Mesh();
 	obj2->CreateMesh(vertices, indices, 32, 12);
 	meshList.push_back(obj2);
 
-	Mesh *obj3 = new Mesh();
+	Mesh* obj3 = new Mesh();
 	obj3->CreateMesh(floorVertices, floorIndices, 32, 6);
 	meshList.push_back(obj3);
 
@@ -323,7 +360,7 @@ void CreateObjects()
 
 void CreateShaders()
 {
-	Shader *shader1 = new Shader();
+	Shader* shader1 = new Shader();
 	shader1->CreateFromFiles(vShader, fShader);
 	shaderList.push_back(*shader1);
 }
@@ -331,18 +368,18 @@ void CreateShaders()
 void CrearDado()
 {
 	unsigned int dado_indices[] = {
-		0, 1, 2,   
-		3, 4, 5,  
-		6, 7, 8, 
+		0, 1, 2,
+		3, 4, 5,
+		6, 7, 8,
 		9, 10, 11,
 		12, 13, 14,
-		15, 16, 17, 
-		18, 19, 20, 
-		21, 22, 23  
+		15, 16, 17,
+		18, 19, 20,
+		21, 22, 23
 	};
 
-        GLfloat sin60 = 0.866025f;
-        GLfloat cos60 = 0.5f;
+	GLfloat sin60 = 0.866025f;
+	GLfloat cos60 = 0.5f;
 
 	GLfloat dado_vertices[] = {
 		// x      y      z       u     v      nx     ny     nz
@@ -367,25 +404,25 @@ void CrearDado()
 		 -1.0f,  0.0f,  1.0f,   0.683f, 0.5037f,  cos60, -sin60, 0.0f,
 		 0.0f,  2.0f,  0.0f,   0.4887f, 0.26809f,  cos60, -sin60, 0.0f,
 
-		// Cara 4
-		 -1.0f,  0.0f,  1.0f,   0.6834f, 0.5037f,   0.0f, sin60,  -cos60,
-		 1.0f,  0.0f,  1.0f,   0.2959f, 0.5037f,   0.0f,  sin60,  -cos60,
-		 0.0f,  -2.0f,  0.0f,   0.4887f, 0.7387f,   0.0f,  sin60,  -cos60,
+		 // Cara 4
+		  -1.0f,  0.0f,  1.0f,   0.6834f, 0.5037f,   0.0f, sin60,  -cos60,
+		  1.0f,  0.0f,  1.0f,   0.2959f, 0.5037f,   0.0f,  sin60,  -cos60,
+		  0.0f,  -2.0f,  0.0f,   0.4887f, 0.7387f,   0.0f,  sin60,  -cos60,
 
-		 // Cara 6
-		 1.0f,  0.0f, -1.0f,   0.10201f, 0.73988f,   -cos60, sin60,  0.0f,
-		 1.0f,  0.0f,  1.0f,   0.2959f, 0.5037f,   -cos60, sin60,  0.0f,
-		 0.0f,  -2.0f,  0.0f,   0.4887f, 0.7387f,   -cos60, sin60,  0.0f,
+		  // Cara 6
+		  1.0f,  0.0f, -1.0f,   0.10201f, 0.73988f,   -cos60, sin60,  0.0f,
+		  1.0f,  0.0f,  1.0f,   0.2959f, 0.5037f,   -cos60, sin60,  0.0f,
+		  0.0f,  -2.0f,  0.0f,   0.4887f, 0.7387f,   -cos60, sin60,  0.0f,
 
-		 // Cara 8
-		 -1.0f,  0.0f,  -1.0f,  0.2959f, 0.9735f,   0.0f,  sin60, cos60,
-		 1.0f,  0.0f,  -1.0f,   0.10201f, 0.73988f,   0.0f,  sin60, cos60,
-		 0.0f,  -2.0f, 0.0f,   0.4887f, 0.7387f,   0.0f,  sin60, cos60,
+		  // Cara 8
+		  -1.0f,  0.0f,  -1.0f,  0.2959f, 0.9735f,   0.0f,  sin60, cos60,
+		  1.0f,  0.0f,  -1.0f,   0.10201f, 0.73988f,   0.0f,  sin60, cos60,
+		  0.0f,  -2.0f, 0.0f,   0.4887f, 0.7387f,   0.0f,  sin60, cos60,
 
-		 // Cara 2
-		 -1.0f,  0.0f,  -1.0f,   0.875f, 0.73789f,  cos60, sin60, 0.0f,
-		 -1.0f,  0.0f,  1.0f,   0.6834f, 0.5037f,  cos60, sin60, 0.0f,
-		 0.0f,  -2.0f,  0.0f,   0.4887f, 0.7387f,  cos60, sin60, 0.0f,
+		  // Cara 2
+		  -1.0f,  0.0f,  -1.0f,   0.875f, 0.73789f,  cos60, sin60, 0.0f,
+		  -1.0f,  0.0f,  1.0f,   0.6834f, 0.5037f,  cos60, sin60, 0.0f,
+		  0.0f,  -2.0f,  0.0f,   0.4887f, 0.7387f,  cos60, sin60, 0.0f,
 	};
 
 
@@ -408,15 +445,15 @@ int i_max_steps = 20; //N�mero de pasos entre cuadros para interpolaci�n, a 
 int i_curr_steps = 0;
 typedef struct _frame
 {
-    //Variables para GUARDAR Key Frames
-    float movLlave_x;		//Variable para PosicionX
-    float movLlave_y;		//Variable para PosicionY
-    float movLlave_xInc;		//Variable para IncrementoX
-    float movLlave_yInc;		//Variable para IncrementoY
-    float giroLlave;
-    float giroLlaveInc;
-    float giroCofre;
-    float giroCofreInc;
+	//Variables para GUARDAR Key Frames
+	float movLlave_x;		//Variable para PosicionX
+	float movLlave_y;		//Variable para PosicionY
+	float movLlave_xInc;		//Variable para IncrementoX
+	float movLlave_yInc;		//Variable para IncrementoY
+	float giroLlave;
+	float giroLlaveInc;
+	float giroCofre;
+	float giroCofreInc;
 
 }FRAME;
 
@@ -428,79 +465,79 @@ int playIndex = 0;
 void saveFrame(void) //tecla L
 {
 
-    printf("frameindex %d\n", FrameIndex);
+	printf("frameindex %d\n", FrameIndex);
 
 
-    KeyFrame[FrameIndex].movLlave_x = movLlave_x;
-    KeyFrame[FrameIndex].movLlave_y = movLlave_y;
-    KeyFrame[FrameIndex].giroLlave = giroLlave;
-    KeyFrame[FrameIndex].giroCofre = giroCofre;
-    //Se agregan nuevas l�neas para guardar m�s variables si es necesario
+	KeyFrame[FrameIndex].movLlave_x = movLlave_x;
+	KeyFrame[FrameIndex].movLlave_y = movLlave_y;
+	KeyFrame[FrameIndex].giroLlave = giroLlave;
+	KeyFrame[FrameIndex].giroCofre = giroCofre;
+	//Se agregan nuevas l�neas para guardar m�s variables si es necesario
 
-    //no volatil,se requiere agregar una forma de escribir a un archivo para guardar los frames
-    FrameIndex++;
+	//no volatil,se requiere agregar una forma de escribir a un archivo para guardar los frames
+	FrameIndex++;
 
-    archivo = fopen("datos.txt", "a");
-    if (err != 0 || archivo == NULL) {
-        printf("Error al abrir el archivo.\n");
-        exit(EXIT_FAILURE);
-    }
-    fprintf(archivo, "%f\n", movLlave_x);
-    fprintf(archivo, "%f\n", movLlave_y);
-    fprintf(archivo, "%f\n", giroLlave);
-    fprintf(archivo, "%f\n", giroCofre);
-    fclose(archivo);
+	archivo = fopen("datos.txt", "a");
+	if (err != 0 || archivo == NULL) {
+		printf("Error al abrir el archivo.\n");
+		exit(EXIT_FAILURE);
+	}
+	fprintf(archivo, "%f\n", movLlave_x);
+	fprintf(archivo, "%f\n", movLlave_y);
+	fprintf(archivo, "%f\n", giroLlave);
+	fprintf(archivo, "%f\n", giroCofre);
+	fclose(archivo);
 
 }
 
 void readFile(void) {
-    archivo = fopen("datos.txt", "r");
-    if (err != 0 || archivo == NULL) {
-        printf("Error al abrir el archivo.\n");
-        return; 
-    }
+	archivo = fopen("datos.txt", "r");
+	if (err != 0 || archivo == NULL) {
+		printf("Error al abrir el archivo.\n");
+		return;
+	}
 
-    // Reiniciamos FrameIndex para cargar la animación desde cero
-    FrameIndex = 0;
-    float x, y, g, g2;
+	// Reiniciamos FrameIndex para cargar la animación desde cero
+	FrameIndex = 0;
+	float x, y, g, g2;
 
-    while (fscanf(archivo, "%f %f %f %f", &x, &y, &g, &g2) == 4) {
-        if (FrameIndex >= MAX_FRAMES) {
-            printf("Se alcanzó el máximo de frames (%d).\n", MAX_FRAMES);
-            break; // Evitar que se desborde el arreglo
-        }
+	while (fscanf(archivo, "%f %f %f %f", &x, &y, &g, &g2) == 4) {
+		if (FrameIndex >= MAX_FRAMES) {
+			printf("Se alcanzó el máximo de frames (%d).\n", MAX_FRAMES);
+			break; // Evitar que se desborde el arreglo
+		}
 
-        // Guardamos los valores en el ARREGLO, no en las variables globales
-        KeyFrame[FrameIndex].movLlave_x = x;
-        KeyFrame[FrameIndex].movLlave_y = y;
-        KeyFrame[FrameIndex].giroLlave = g;
-        KeyFrame[FrameIndex].giroCofre = g2;
+		// Guardamos los valores en el ARREGLO, no en las variables globales
+		KeyFrame[FrameIndex].movLlave_x = x;
+		KeyFrame[FrameIndex].movLlave_y = y;
+		KeyFrame[FrameIndex].giroLlave = g;
+		KeyFrame[FrameIndex].giroCofre = g2;
 
-        printf("Leído Frame %d: x=%.1f, y=%.1f, g=%.1f, g2=%.1f\n", FrameIndex, x, y, g, g2);
-        FrameIndex++; // Incrementamos el índice de frames leídos
-    }
+		printf("Leído Frame %d: x=%.1f, y=%.1f, g=%.1f, g2=%.1f\n", FrameIndex, x, y, g, g2);
+		FrameIndex++; // Incrementamos el índice de frames leídos
+	}
 
-    fclose(archivo);
-    printf("Lectura de archivo completa. Total de frames cargados: %d\n", FrameIndex);
+	fclose(archivo);
+	printf("Lectura de archivo completa. Total de frames cargados: %d\n", FrameIndex);
 
 }
 
 void resetElements(void) //Tecla 0
 {
 
-    movLlave_x = KeyFrame[0].movLlave_x;
-    movLlave_y = KeyFrame[0].movLlave_y;
-    giroLlave = KeyFrame[0].giroLlave;
-    giroCofre = KeyFrame[0].giroCofre;
+	movLlave_x = KeyFrame[0].movLlave_x;
+	movLlave_y = KeyFrame[0].movLlave_y;
+	giroLlave = KeyFrame[0].giroLlave;
+	giroCofre = KeyFrame[0].giroCofre;
 }
 
 
 void interpolation(void)
 {
-    KeyFrame[playIndex].movLlave_xInc = (KeyFrame[playIndex + 1].movLlave_x - KeyFrame[playIndex].movLlave_x) / i_max_steps;
-    KeyFrame[playIndex].movLlave_yInc = (KeyFrame[playIndex + 1].movLlave_y - KeyFrame[playIndex].movLlave_y) / i_max_steps;
-    KeyFrame[playIndex].giroLlaveInc = (KeyFrame[playIndex + 1].giroLlave - KeyFrame[playIndex].giroLlave) / i_max_steps;
-    KeyFrame[playIndex].giroCofreInc = (KeyFrame[playIndex + 1].giroCofre - KeyFrame[playIndex].giroCofre) / i_max_steps;
+	KeyFrame[playIndex].movLlave_xInc = (KeyFrame[playIndex + 1].movLlave_x - KeyFrame[playIndex].movLlave_x) / i_max_steps;
+	KeyFrame[playIndex].movLlave_yInc = (KeyFrame[playIndex + 1].movLlave_y - KeyFrame[playIndex].movLlave_y) / i_max_steps;
+	KeyFrame[playIndex].giroLlaveInc = (KeyFrame[playIndex + 1].giroLlave - KeyFrame[playIndex].giroLlave) / i_max_steps;
+	KeyFrame[playIndex].giroCofreInc = (KeyFrame[playIndex + 1].giroCofre - KeyFrame[playIndex].giroCofre) / i_max_steps;
 }
 
 
@@ -519,19 +556,22 @@ void animate(void)
 				printf("termino la animacion\n");
 				playIndex = 0;
 				play = false;
-			} else if (playIndex > FrameIndex - 3) {
+			}
+			else if (playIndex > FrameIndex - 3) {
 				// Fin de toda la animaci�n con �ltimo frame?
 				if (manejoAni == false) {
 					manejoAni = true;
 				}
 
-			} else {
+			}
+			else {
 				//Interpolaci�n del pr�ximo cuadro
 				i_curr_steps = 0; //Resetea contador
 				//Interpolar
 				interpolation();
 			}
-		} else {
+		}
+		else {
 			//Dibujar Animaci�n
 			if (manejoAni == false) {
 				movLlave_x += KeyFrame[playIndex].movLlave_xInc;
@@ -549,6 +589,59 @@ void animate(void)
 
 int main()
 {
+
+
+	if (!alutInit(NULL, NULL)) {
+		ALenum error = alutGetError();
+		fprintf(stderr, "%s\n", alutGetErrorString(error));
+		exit(EXIT_FAILURE);
+	}
+
+
+	ALCcontext* context;
+	ALCdevice* device;
+
+	device = alcOpenDevice(NULL);
+	if (device == nullptr) {
+		fprintf(stderr, "No se pudo abrir el dispositivo de audio: %d...\n", alGetError());
+	}
+
+
+	context = alcCreateContext(device, NULL);
+	alcMakeContextCurrent(context);
+
+	alGetError();
+
+	ALenum error;
+	ALuint     alBuffer;             //data for the buffer
+	unsigned int alSource;      //source
+	ALuint     alBuffer2;             //data for the buffer
+	unsigned int alSource2;      //source
+
+	alBuffer = alutCreateBufferFromFile("./audio/hacienda.wav");
+	if (alBuffer == AL_NONE) {
+		error = alutGetError();
+		fprintf(stderr, "Error loading file: '%s'\n",
+			alutGetErrorString(error));
+		alutExit();
+		exit(EXIT_FAILURE);
+	}
+	alGenSources(1, &alSource);
+	alSourcei(alSource, AL_BUFFER, alBuffer);
+
+
+	alBuffer2 = alutCreateBufferFromFile("./audio/golpe.wav");
+	if (alBuffer2 == AL_NONE) {
+		error = alutGetError();
+		fprintf(stderr, "Error loading file: '%s'\n",
+			alutGetErrorString(error));
+		alutExit();
+		exit(EXIT_FAILURE);
+	}
+	alGenSources(1, &alSource2);
+	alSourcei(alSource2, AL_BUFFER, alBuffer2);
+
+
 	// mainWindow = Window(1366, 768); // 1280, 1024 or 1024, 768
 	mainWindow = Window(1920, 1080); // 1280, 1024 or 1024, 768
 	mainWindow.Initialise();
@@ -595,7 +688,6 @@ int main()
 	chest = Texture("Textures/chest.png");
 	chest.LoadTextureA();
 
-
 	padock1 = Texture("Textures/texture1.png");
 	padock1.LoadTextureA();
 	padock2 = Texture("Textures/texture2.png");
@@ -604,6 +696,22 @@ int main()
 	padock3.LoadTextureA();
 	padockLetter = Texture("Textures/1.png");
 	padockLetter.LoadTextureA();
+
+	ballcourt1 = Texture("Textures/7macaw_Material.003_BaseColor.png");
+	ballcourt1.LoadTextureA();
+	ballcourt2 = Texture("Textures/7macaw_Material.003_Normal.png");
+	ballcourt2.LoadTextureA();
+	ballcourt3 = Texture("Textures/7macaw_Material.003_Roughness.png");
+	ballcourt3.LoadTextureA();
+	ballcourt4 = Texture("Textures/ballourt_Material_BaseColor.png");
+	ballcourt4.LoadTextureA();
+	ballcourt5 = Texture("Textures/ballourt_Material_Normal.png");
+	ballcourt5.LoadTextureA();
+	ballcourt6 = Texture("Textures/ballourt_Material_Roughness.png");
+	ballcourt6.LoadTextureA();
+
+	cara = Texture("Textures/cara.png");
+	cara.LoadTextureA();
 
 
 	Lampara_M = Model();
@@ -634,15 +742,15 @@ int main()
 	XueTurbina_M.LoadModel("./Models/xue-turbina.obj");
 	XuePaleta_M.LoadModel("./Models/xue-paleta.obj");
 
-        avatarCuerpo_M = Model();
+	avatarCuerpo_M = Model();
 	avatarCuerpo_M.LoadModel("./Models/avatar-cuerpo.obj");
-        avatarMuslo_M = Model();
+	avatarMuslo_M = Model();
 	avatarMuslo_M.LoadModel("./Models/avatar-muslo.obj");
-        avatarPierna_M = Model();
+	avatarPierna_M = Model();
 	avatarPierna_M.LoadModel("./Models/avatar-pierna.obj");
-        avatarBrazo_M = Model();
+	avatarBrazo_M = Model();
 	avatarBrazo_M.LoadModel("./Models/avatar-brazo.obj");
-        avatarAntebrazo_M = Model();
+	avatarAntebrazo_M = Model();
 	avatarAntebrazo_M.LoadModel("./Models/avatar-antebrazo.obj");
 
 	Blackhawk_M = Model();
@@ -707,6 +815,8 @@ int main()
 	racecourse.LoadModel("Models/racecourse.obj");
 	palmera = Model();
 	palmera.LoadModel("Models/tulum/palmera.obj");
+	coco = Model();
+	coco.LoadModel("Models/coco.obj");
 	casaTux = Model();
 	casaTux.LoadModel("Models/casaTux.obj");
 	ring = Model();
@@ -723,8 +833,47 @@ int main()
 	chest_body.LoadModel("Models/chest_body.obj");
 	chest_key = Model();
 	chest_key.LoadModel("Models/chest_key.obj");
-	padock = Model();
-	padock.LoadModel("Models/padock.obj");
+
+	beach_M = Model();
+	beach_M.LoadModel("Models/beach.obj");
+	tux_M = Model();
+	tux_M.LoadModel("Models/tux-cuerpo.obj");
+	tuxAla_M = Model();
+	tuxAla_M.LoadModel("Models/tux-ala.obj");
+
+	delfin_M = Model();
+	delfin_M.LoadModel("Models/delfin.obj");
+
+	globo_M = Model();
+	globo_M.LoadModel("Models/globo.obj");
+
+	suzanne_cuerpo_M = Model();
+	suzanne_cuerpo_M.LoadModel("Models/suzanne-cuerpo.obj");
+	suzanne_pierna_M = Model();
+	suzanne_pierna_M.LoadModel("Models/suzanne-pierna.obj");
+	suzanne_antebrazo_M = Model();
+	suzanne_antebrazo_M.LoadModel("Models/suzanne-antebrazo.obj");
+	suzanne_brazo_M = Model();
+	suzanne_brazo_M.LoadModel("Models/suzanne-brazo.obj");
+
+	condor_cuerpo_M = Model();
+	condor_cuerpo_M.LoadModel("Models/condor-cuerpo.obj");
+	condor_muslo_M = Model();
+	condor_muslo_M.LoadModel("Models/condor-muslo.obj");
+	condor_pierna_M = Model();
+	condor_pierna_M.LoadModel("Models/condor-pierna.obj");
+	condor_antebrazo_M = Model();
+	condor_antebrazo_M.LoadModel("Models/condor-antebrazo.obj");
+	condor_brazo_M = Model();
+	condor_brazo_M.LoadModel("Models/condor-brazo.obj");
+
+	thunderbirdCuerpo_M = Model();
+	thunderbirdCuerpo_M.LoadModel("Models/thunderbird-cuerpo.obj");
+	thunderbirdAla_M = Model();
+	thunderbirdAla_M.LoadModel("Models/thunderbird-ala.obj");
+
+	ballcourt_M = Model();
+	ballcourt_M.LoadModel("Models/court.obj");
 
 	std::vector<std::string> skyboxFaces;
 	skyboxFaces.push_back("Textures/Skybox/heather_rt.jpg");
@@ -740,39 +889,39 @@ int main()
 	Material_opaco = Material(0.3f, 4);
 
 
-	glm::vec3 luces[20] = {glm::vec3(-120.0f, -1.0f, -10.0f), glm::vec3(30.0f, 0.0f, 0.0f), glm::vec3(30.0f, 0.0f, 0.0f), glm::vec3(30.0f, 0.0f, 0.0f),
-			       glm::vec3(30.0f, 0.0f, 0.0f) ,glm::vec3(0.0f, 0 - 0.0f, 30.0f) , glm::vec3(0.0f, 0.0f, 30.0f), glm::vec3(0.0f, 0.0f, 30.0f), glm::vec3(0.0f, 0.0f, 30.0f),
-			       glm::vec3(-30.0f, 0.0f, 0.0f),glm::vec3(-30.0f, 0.0f, 0.0f),glm::vec3(-30.0f, 0.0f, 0.0f), glm::vec3(-10.0f, 0.0f, -30.0f), glm::vec3(-10.0f, 0.0f, -30.0f),
-			       glm::vec3(-10.0f, 0.0f, -30.0f)};
+	glm::vec3 luces[20] = { glm::vec3(-120.0f, -1.0f, -10.0f), glm::vec3(30.0f, 0.0f, 0.0f), glm::vec3(30.0f, 0.0f, 0.0f), glm::vec3(30.0f, 0.0f, 0.0f),
+				   glm::vec3(30.0f, 0.0f, 0.0f) ,glm::vec3(0.0f, 0 - 0.0f, 30.0f) , glm::vec3(0.0f, 0.0f, 30.0f), glm::vec3(0.0f, 0.0f, 30.0f), glm::vec3(0.0f, 0.0f, 30.0f),
+				   glm::vec3(-30.0f, 0.0f, 0.0f),glm::vec3(-30.0f, 0.0f, 0.0f),glm::vec3(-30.0f, 0.0f, 0.0f), glm::vec3(-10.0f, 0.0f, -30.0f), glm::vec3(-10.0f, 0.0f, -30.0f),
+				   glm::vec3(-10.0f, 0.0f, -30.0f) };
 
 
 
 	//luz direccional, sólo 1 y siempre debe de existir
 	mainLight = DirectionalLight(1.0f, 1.0f, 1.0f,
-				     0.2f, 0.2f,
-				     0.0f, 0.0f, -1.0f);
+		0.5f, 0.5f,
+		0.0f, 0.0f, -1.0f);
 	//contador de luces puntuales
 	unsigned int pointLightCount = 0;
 	//Declaración de primer luz puntual
 
-        int luz = 15;
-    
+	int luz = 12;
+
 	for (int i = 0; i < luz; i++) {
 		pointLights[i] = PointLight(1.0f, 1.0f, 1.0f,
-					    2.0f, 2.0f,
-					    0.0f, 2.5f, 1.5f,
-					    0.3f, 0.2f, 0.1f);
+			2.0f, 2.0f,
+			0.0f, 2.5f, 1.5f,
+			0.3f, 0.2f, 0.1f);
 	}
 
 
 	unsigned int spotLightCount = 0;
 	//linterna
 	spotLights[0] = SpotLight(1.0f, 1.0f, 1.0f,
-				  0.0f, 2.0f,
-				  0.0f, 0.0f, 0.0f,
-				  0.0f, -1.0f, 0.0f,
-				  1.0f, 0.0f, 0.0f,
-				  5.0f);
+		0.0f, 2.0f,
+		0.0f, 0.0f, 0.0f,
+		0.0f, -1.0f, 0.0f,
+		1.0f, 0.0f, 0.0f,
+		5.0f);
 	spotLightCount++;
 
 	// //luz fija
@@ -811,12 +960,18 @@ int main()
 	// 	1.0f, 0.001f, 0.001f,
 	// 	20.0f);
 
-	// faroTrasero = SpotLight(0.0f, 1.0f, 1.0f,
-	// 	1.0f, 0.2f,
-	// 	5.0f, 10.0f, 0.0f,
-	// 	2.0f, 0.0f, 0.0f,
-	// 	1.0f, 0.001f, 0.001f,
-	// 	20.0f);
+	SpotLight faro1 = SpotLight(0.75f, 1.0f, 0.7f,
+		0.3f, 0.3f,
+		5.0f, 10.0f, 0.0f,
+		2.0f, 0.0f, 0.0f,
+		1.0f, 0.001f, 0.001f,
+		20.0f);
+	SpotLight faro2 = SpotLight(0.5f, 1.0f, 0.5f,
+		0.2f, 0.2f,
+		5.0f, 10.0f, 0.0f,
+		2.0f, 0.0f, 0.0f,
+		1.0f, 0.001f, 0.001f,
+		20.0f);
 
 	// luzCofre = SpotLight(0.25f, 1.0f, 0.0f,
 	// 	1.0f, 2.0f,
@@ -836,7 +991,7 @@ int main()
 	// 	1.0f, 0.01f, 0.01f);
 
 	GLuint uniformProjection = 0, uniformModel = 0, uniformView = 0, uniformEyePosition = 0,
-		uniformSpecularIntensity = 0, uniformShininess = 0, uniformTextureOffset=0;
+		uniformSpecularIntensity = 0, uniformShininess = 0, uniformTextureOffset = 0;
 	GLuint uniformColor = 0;
 	glm::mat4 projection = glm::perspective(45.0f, (GLfloat)mainWindow.getBufferWidth() / mainWindow.getBufferHeight(), 0.1f, 1000.0f);
 	glm::vec3 posblackhawk = glm::vec3(2.0f, 0.0f, 0.0f);
@@ -847,8 +1002,8 @@ int main()
 				glm::vec3(-1.0f, 0.0f, -5.0f), glm::vec3(-4.0f, 0.0f, -5.0f), glm::vec3(4.0f, 0.0f, -5.0f), glm::vec3(-3.0f, 0.0f, -5.0f),
 				glm::vec3(0.0f, 0.0f, -5.0f), glm::vec3(3.0f, 0.0f, -5.0f), glm::vec3(-5.0f, 0.0f, -5.0f), glm::vec3(-1.0f, 0.0f, -5.0f),
 				glm::vec3(5.0f, 0.0f, -5.0f), glm::vec3(2.0f, 0.0f, -5.0f), glm::vec3(-3.0f, 0.0f, -5.0f), glm::vec3(1.0f, 0.0f, -5.0f),
-				glm::vec3(-1.0f, 0.0f, -5.0f), glm::vec3(-5.0f, 0.0f, -5.0f), glm::vec3(0.0f, 0.0f, -5.0f), glm::vec3(-3.0f, 0.0f, -5.0f)};
-    
+				glm::vec3(-1.0f, 0.0f, -5.0f), glm::vec3(-5.0f, 0.0f, -5.0f), glm::vec3(0.0f, 0.0f, -5.0f), glm::vec3(-3.0f, 0.0f, -5.0f) };
+
 	glm::vec3 posLlave = glm::vec3(0.0f, 0.0f, 0.0f);
 
 	glm::vec3 luz_position = glm::vec3(0.0f, 0.0f, 0.0f);
@@ -859,28 +1014,63 @@ int main()
 
 	std::vector<MovingEntity*> movingEntities;
 
+	// Pos: 153.167160 41.381664 -228.169876
+	// Dir: -21.500000 71.000000
 
-        movingEntities.push_back(new Beastie(&beastieCarro_M, &beastieCarroLlantaTras_M, &beastieCarroLlantaDel_M, glm::vec3(0.0f), [](GLfloat t) {
+	movingEntities.push_back(new Beastie(&beastieCarro_M, &beastieCarroLlantaTras_M, &beastieCarroLlantaDel_M, glm::vec3(150.0f, 0.0f, -230.0f), [](GLfloat t) {
 		return glm::vec3(20.0f * cos(t), 0.0f, 50.0f * sin(0.666f * t));
-	}));
+		}));
 
-        movingEntities.push_back(new Beastie(&beastieCarro_M, &beastieCarroLlantaTras_M, &beastieCarroLlantaDel_M, glm::vec3(0.0f), [](GLfloat t) {
-		return glm::vec3(40.0f * cos(t), 75.0f + 20.0f * sin(t), 100.0f * sin(0.666f * t));
-	}));
-
-        movingEntities.push_back(new Xue(&XueCarro_M, &XuePaleta_M, &XueTurbina_M, glm::vec3(0.0f), [](GLfloat t) {
+	movingEntities.push_back(new Xue(&XueCarro_M, &XuePaleta_M, &XueTurbina_M, glm::vec3(160.0f, 0.0f, -240.0f), [](GLfloat t) {
 		return glm::vec3(40.0f * cos(t), 0.0f, 40.0f * sin(0.666f * t));
-	}));
+		}));
 
-        avatar = new Avatar(&avatarCuerpo_M, &avatarMuslo_M, &avatarPierna_M, &avatarBrazo_M, &avatarAntebrazo_M, glm::vec3(0.0f, 0.0f, 2.0f));
+	movingEntities.push_back(new Thunderbird(&thunderbirdCuerpo_M, &thunderbirdAla_M, glm::vec3(0.0f), [](GLfloat t) {
+		return glm::vec3(40.0f * cos(t), 75.0f + 20.0f * sin(t), 100.0f * sin(0.666f * t));
+		}));
+
+	movingEntities.push_back(new Thunderbird(&thunderbirdCuerpo_M, &thunderbirdAla_M, glm::vec3(200.0f, 0.0f, 200.0f), [](GLfloat t) {
+		return glm::vec3(40.0f * cos(t), 75.0f + 20.0f * sin(t), 100.0f * sin(0.666f * t));
+		}));
+
+
+	delfin = new Delfin(&delfin_M, glm::vec3(-400.0f, 0.0f, 100.0f), [](GLfloat t) {
+		return glm::vec3(0.0f, 20 * sin(t) - 5.0f, 20.0f * cos(t));
+		});
+
+	movingEntities.push_back(new Globo(
+		&globo_M, glm::vec3(0.0f, 0.0f, 0.0f), [](GLfloat t) {
+			while (t > 120.0f) {
+				t -= 120.0f;
+			}
+
+			if (t <= 5.0f) {
+				return glm::vec3(300.0f, 30 * t, 0.0f);
+			}
+			else if (t <= 55.0f) {
+				t -= 5.0f;
+				return glm::vec3(300.0f * cos(0.12566 * t), 160.0f + 15 * sin(t * 1.256), 300.0f * sin(0.12566 * t));
+			}
+			else if (t <= 60.0f) {
+				return glm::vec3(300.0f, 30 * (60 - t), 0.0f);
+			}
+
+			return glm::vec3(300.0f, 0.0f, 0.0f);
+		}));
+
+	movingEntities.push_back(delfin);
+
+	avatar = new Avatar(&avatarCuerpo_M, &avatarMuslo_M, &avatarPierna_M, &avatarBrazo_M, &avatarAntebrazo_M, glm::vec3(0.0f, 0.0f, 2.0f));
 	avatar->startAnimation();
 
-        camera.setAvatar(avatar);
 
-        camera.addLocation(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec2(0.0f, 0.0f));
-        camera.addLocation(glm::vec3(0.0f, 2.0f, 0.0f), glm::vec2(45.0f, 0.0f));
-        camera.addLocation(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec2(0.0f, 45.0f));
-        camera.addLocation(glm::vec3(2.0f, 0.0f, 0.0f), glm::vec2(0.0f, 90.0f));
+
+
+	camera.setAvatar(avatar);
+
+	camera.addLocation(glm::vec3(5.0f, 30.0f, 140.0f), glm::vec2(-20.0f, 0.0f));
+	camera.addLocation(glm::vec3(-225.0f, 20.0f, 125.0f), glm::vec2(-20.0f, -135.0f));
+	camera.addLocation(glm::vec3(-17.0f, 110.0f, -320.0f), glm::vec2(-27.0f, 30.0f));
 
 	// Lee los keyframes del archivo
 	// readKeyframes("keyframes-palmera.txt");
@@ -903,7 +1093,7 @@ int main()
 	GLfloat lastLetrero = glfwGetTime();
 
 	int indiceLetrero = 0;
-        char letreroTexto[] = " PROYECTO CGEIHC ";
+	char letreroTexto[] = " PROYECTO CGEIHC ";
 	glm::vec4 dir = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
 	glm::mat4 rotDado = glm::mat4(1.0f);
 	int contadorGiros = 0;
@@ -911,6 +1101,23 @@ int main()
 	int ultimoRandom = 0;
 	int r = 0;
 	int k;
+
+	model = glm::translate(model, glm::vec3(-230.0f, 0.0f, 100.0f));
+	model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+	tux = new Tux(&tux_M, &tuxAla_M, model);
+
+	suzanne = new Suzanne(&suzanne_cuerpo_M, &suzanne_pierna_M, &suzanne_antebrazo_M, &suzanne_brazo_M, glm::mat4(1.0f));
+	condor = new Condor(&condor_cuerpo_M, &condor_muslo_M, &condor_pierna_M, &condor_antebrazo_M, &condor_brazo_M, glm::mat4(1.0f));
+
+	bool firstFrame = true;
+	GLfloat hora = 60.0f;
+
+	float gain = 0.25f;
+	alSourcef(alSource, AL_GAIN, gain);
+	alSourcei(alSource, AL_LOOPING, AL_TRUE);
+
+	alSourcePlay(alSource);
+
 
 	// Loop mientras no se cierra la ventana
 	while (!mainWindow.getShouldClose())
@@ -921,16 +1128,24 @@ int main()
 		deltaTime += (now - lastTime) / limitFPS;
 		lastTime = now;
 
+		if (!firstFrame) {
+			hora += dt;
+		}
+		if (hora >= 120.0f) {
+			hora -= 120.0f;
+		}
+
 		mainWindow.UpdatePos(dt);
 
-                pointLightCount = 0;
-                spotLightCount = 0;
+		pointLightCount = 0;
+		spotLightCount = 0;
 
 		// Recibir eventos del usuario
 		glfwPollEvents();
 		if (camera.getEstado() == RIGGING_CAMERA) {
 			camera.updateRig(dt);
-		} else {
+		}
+		else {
 			camera.keyControl(mainWindow.getsKeys(), deltaTime);
 			camera.mouseControl(mainWindow.getXChange(), mainWindow.getYChange());
 		}
@@ -942,7 +1157,7 @@ int main()
 		// Clear the window
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		skybox.DrawSkybox(camera.calculateViewMatrix(), projection);
+		skybox.DrawSkybox(camera.calculateViewMatrix(), projection, hora);
 		shaderList[0].UseShader();
 		uniformModel = shaderList[0].GetModelLocation();
 		uniformProjection = shaderList[0].GetProjectionLocation();
@@ -950,7 +1165,7 @@ int main()
 		uniformEyePosition = shaderList[0].GetEyePositionLocation();
 		uniformColor = shaderList[0].getColorLocation();
 		uniformTextureOffset = shaderList[0].getOffsetLocation(); // para la textura con movimiento
-		
+
 		//información en el shader de intensidad especular y brillo
 		uniformSpecularIntensity = shaderList[0].GetSpecularIntensityLocation();
 		uniformShininess = shaderList[0].GetShininessLocation();
@@ -986,20 +1201,22 @@ int main()
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Diablo_M.RenderModel();
 
-                // if (mainWindow.getPrendeDiablo()) {
-		// 	model = glm::translate(model, glm::vec3(0.0f, 1.0f, 0.0f));
-		// 	lightpos = model * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
-		// 	luzDiablo.SetPos(lightpos);
-		// 	pointLights[pointLightCount++] = luzDiablo;
-		// }
+		// if (mainWindow.getPrendeDiablo()) {
+// 	model = glm::translate(model, glm::vec3(0.0f, 1.0f, 0.0f));
+// 	lightpos = model * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+// 	luzDiablo.SetPos(lightpos);
+// 	pointLights[pointLightCount++] = luzDiablo;
+// }
 
 		model = glm::mat4(1.0);
+		model = glm::translate(model, glm::vec3(0.0f, 0.0f, 200.0f));
+		model = glm::scale(model, glm::vec3(-1.0f, 1.0f, -1.0f));
 		model = glm::translate(model, glm::vec3(-170.0f, -5.0f, 0.0f));
 		model = glm::rotate(model, 30 * toRadians, glm::vec3(0.0f, 1.0f, 0.0f));
 		model = glm::scale(model, glm::vec3(0.4f, 0.4f, 0.4f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		casaTux.RenderModel();
-	
+
 		model = glm::translate(model, glm::vec3(-40.0, -4.0f, 60.0f));;
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		smallCasaTux.RenderModel();
@@ -1009,6 +1226,8 @@ int main()
 		smallCasaTux.RenderModel();
 
 		model = glm::mat4(1.0);
+		model = glm::translate(model, glm::vec3(0.0f, 0.0f, 200.0f));
+		model = glm::scale(model, glm::vec3(-1.0f, 1.0f, -1.0f));
 		model = glm::translate(model, glm::vec3(152.0f, -2.0f, 100.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		palmera.RenderModel();
@@ -1022,34 +1241,46 @@ int main()
 
 		}
 
-				model = glm::mat4(1.0);
+		model = glm::mat4(1.0);
 		model = glm::translate(model, glm::vec3(-182.0f, -2.0f, 100.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		palmera.RenderModel();
 
 
+
+
 		for (i = 0; i < 20; i++) {
 			model = glm::translate(model, arbol[i]);
 			glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 			bottom_Trunk.UseTexture();
 			palmera.RenderModel();
 
+
 		}
+
+
 
 		model = glm::mat4(1.0);
 		model = glm::translate(model, glm::vec3(-40.0f, -2.0f, -170.0f));
 		model = glm::rotate(model, 90 * toRadians, glm::vec3(0.0f, 1.0f, 0.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+
 		palmera.RenderModel();
+
+
+
 
 
 		for (i = 0; i < 20; i++) {
 			model = glm::translate(model, arbol[i]);
 			glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 			bottom_Trunk.UseTexture();
+
 			palmera.RenderModel();
 
+
 		}
+
 
 		model = glm::mat4(1.0);
 		model = glm::translate(model, glm::vec3(-40.0f, -2.0f, -190.0f));
@@ -1059,49 +1290,80 @@ int main()
 
 
 		for (i = 0; i < 20; i++) {
+
 			model = glm::translate(model, arbol[i]);
+
 			glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 			bottom_Trunk.UseTexture();
 			palmera.RenderModel();
 
+
+
+
+
 		}
 
+
+
+
 		model = glm::mat4(1.0);
+
 		model = glm::translate(model, glm::vec3(-60.0f, -2.0f, 220.0f));
 		model = glm::rotate(model, 270 * toRadians, glm::vec3(0.0f, 1.0f, 0.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+
 		palmera.RenderModel();
 
 
 		for (i = 0; i < 20; i++) {
+
 			model = glm::translate(model, arbol[i]);
+
 			glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+
 			bottom_Trunk.UseTexture();
+
 			palmera.RenderModel();
+
 
 		}
 
+
 		//fin palmeras
 
+
 		model = glm::mat4(1.0);
+		model = glm::translate(model, glm::vec3(0.0f, 0.0f, 200.0f));
+		model = glm::scale(model, glm::vec3(-1.0f, 1.0f, -1.0f));
 		model = glm::translate(model, luces[0]);
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		lampara.RenderModel();
-		luz_position = glm::vec3(model[3][0], model[3][1]+5, model[3][2]);
+		luz_position = glm::vec3(model[3][0], model[3][1] + 5, model[3][2]);
 		pointLights[0].SetPos(luz_position);
 
+
+		int t = glfwGetTime();
 		for (k = 1; k < luz; k++) {
 			model = glm::translate(model, luces[k]);
 			glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 			lampara.RenderModel();
-			luz_position = glm::vec3(model[3][0], model[3][1] + 5, model[3][2]);
-			pointLights[k].SetPos(luz_position);
-			pointLights[pointLightCount++] = pointLights[k];
+			if (hora < 60.0f) {
+				luz_position = glm::vec3(model[3][0], model[3][1] + 5, model[3][2]);
+				pointLights[k].SetPos(luz_position);
+				pointLights[pointLightCount++] = pointLights[k];
+			}
 		}
 
-		
+		if (hora < 60.0f) {
+			faro1.SetFlash(movingEntities[0]->getPos(), movingEntities[0]->getDiff());
+			faro2.SetFlash(movingEntities[1]->getPos(), movingEntities[1]->getDiff());
+			spotLights[spotLightCount++] = faro1;
+			spotLights[spotLightCount++] = faro2;
+		}
 
 		model = glm::mat4(1.0);
+		model = glm::translate(model, glm::vec3(0.0f, 0.0f, 200.0f));
+		model = glm::scale(model, glm::vec3(-1.0f, 1.0f, -1.0f));
 		model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
 		model = glm::rotate(model, 30 * toRadians, glm::vec3(0.0f, 1.0f, 0.0f));
 		model = glm::scale(model, glm::vec3(8.0f, 8.0f, 8.0f));
@@ -1110,6 +1372,8 @@ int main()
 		castillo.RenderModel();
 
 		model = glm::mat4(1.0);
+		model = glm::translate(model, glm::vec3(0.0f, 0.0f, 200.0f));
+		model = glm::scale(model, glm::vec3(-1.0f, 1.0f, -1.0f));
 		model = glm::translate(model, glm::vec3(0.0f, -5.0f, 0.0f));
 		model = glm::rotate(model, 30 * toRadians, glm::vec3(0.0f, 1.0f, 0.0f));
 		modelaux = model;
@@ -1121,6 +1385,13 @@ int main()
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		ring.RenderModel();
 
+		suzanne->setModel(model);
+		suzanne->update(dt);
+		suzanne->render(uniformModel);
+		condor->setModel(model);
+		condor->update(dt);
+		condor->render(uniformModel);
+
 		model = glm::translate(model, glm::vec3(35.0f, 2.0f, -8.0f));
 		model = glm::rotate(model, 60 * toRadians, glm::vec3(0.0f, 1.0f, 0.0f));
 		model = glm::scale(model, glm::vec3(0.1f, 0.1f, 0.1f));
@@ -1128,6 +1399,8 @@ int main()
 		santo.RenderModel();
 
 		model = glm::mat4(1.0);
+		model = glm::translate(model, glm::vec3(0.0f, 0.0f, 200.0f));
+		model = glm::scale(model, glm::vec3(-1.0f, 1.0f, -1.0f));
 		model = glm::translate(model, glm::vec3(0.0f, -1.0f, 0.0f));
 		model = glm::rotate(model, 30 * toRadians, glm::vec3(0.0f, 1.0f, 0.0f));
 		model = glm::scale(model, glm::vec3(8.0f, 8.0f, 8.0f));
@@ -1135,6 +1408,8 @@ int main()
 		esqIzq.RenderModel();
 
 		model = glm::mat4(1.0);
+		model = glm::translate(model, glm::vec3(0.0f, 0.0f, 200.0f));
+		model = glm::scale(model, glm::vec3(-1.0f, 1.0f, -1.0f));
 		model = glm::translate(model, glm::vec3(0.0f, -1.0f, 0.0f));
 		model = glm::rotate(model, 30 * toRadians, glm::vec3(0.0f, 1.0f, 0.0f));
 		model = glm::scale(model, glm::vec3(8.0f, 8.0f, 8.0f));
@@ -1143,6 +1418,8 @@ int main()
 		casitaIzq.RenderModel();
 
 		model = glm::mat4(1.0);
+		model = glm::translate(model, glm::vec3(0.0f, 0.0f, 200.0f));
+		model = glm::scale(model, glm::vec3(-1.0f, 1.0f, -1.0f));
 		model = glm::translate(model, glm::vec3(0.0f, -5.0f, 0.0f));
 		model = glm::rotate(model, 30 * toRadians, glm::vec3(0.0f, 1.0f, 0.0f));
 		model = glm::scale(model, glm::vec3(8.0f, 8.0f, 8.0f));
@@ -1151,6 +1428,8 @@ int main()
 		ruinasIzq.RenderModel();
 
 		model = glm::mat4(1.0);
+		model = glm::translate(model, glm::vec3(0.0f, 0.0f, 200.0f));
+		model = glm::scale(model, glm::vec3(-1.0f, 1.0f, -1.0f));
 		model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
 		model = glm::rotate(model, 30 * toRadians, glm::vec3(0.0f, 1.0f, 0.0f));
 		model = glm::scale(model, glm::vec3(8.0f, 8.0f, 8.0f));
@@ -1159,6 +1438,8 @@ int main()
 		esqIzqFrente.RenderModel();
 
 		model = glm::mat4(1.0);
+		model = glm::translate(model, glm::vec3(0.0f, 0.0f, 200.0f));
+		model = glm::scale(model, glm::vec3(-1.0f, 1.0f, -1.0f));
 		model = glm::translate(model, glm::vec3(0.0f, -1.0f, 0.0f));
 		model = glm::rotate(model, 30 * toRadians, glm::vec3(0.0f, 1.0f, 0.0f));
 		model = glm::scale(model, glm::vec3(8.0f, 8.0f, 8.0f));
@@ -1167,6 +1448,8 @@ int main()
 		cajaFrente.RenderModel();
 
 		model = glm::mat4(1.0);
+		model = glm::translate(model, glm::vec3(0.0f, 0.0f, 200.0f));
+		model = glm::scale(model, glm::vec3(-1.0f, 1.0f, -1.0f));
 		model = glm::translate(model, glm::vec3(0.0f, -1.0f, 0.0f));
 		model = glm::rotate(model, 30 * toRadians, glm::vec3(0.0f, 1.0f, 0.0f));
 		model = glm::scale(model, glm::vec3(8.0f, 8.0f, 8.0f));
@@ -1175,6 +1458,8 @@ int main()
 		constFrente.RenderModel();
 
 		model = glm::mat4(1.0);
+		model = glm::translate(model, glm::vec3(0.0f, 0.0f, 200.0f));
+		model = glm::scale(model, glm::vec3(-1.0f, 1.0f, -1.0f));
 		model = glm::translate(model, glm::vec3(0.0f, -1.0f, 0.0f));
 		model = glm::rotate(model, 30 * toRadians, glm::vec3(0.0f, 1.0f, 0.0f));
 		model = glm::scale(model, glm::vec3(8.0f, 8.0f, 8.0f));
@@ -1183,16 +1468,19 @@ int main()
 		explanadaDer.RenderModel();
 
 		model = glm::mat4(1.0);
+		model = glm::translate(model, glm::vec3(0.0f, 0.0f, 200.0f));
+		model = glm::scale(model, glm::vec3(-1.0f, 1.0f, -1.0f));
 		model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
 		model = glm::rotate(model, 30 * toRadians, glm::vec3(0.0f, 1.0f, 0.0f));
 		model = glm::scale(model, glm::vec3(8.0f, 8.0f, 8.0f));
 		modelaux = model;
 		// model = glm::rotate(model, -90 * toRadians, glm::vec3(1.0f, 0.0f, 0.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-		roca.UseTexture();
 		esqDer.RenderModel();
 
 		model = glm::mat4(1.0);
+		model = glm::translate(model, glm::vec3(0.0f, 0.0f, 200.0f));
+		model = glm::scale(model, glm::vec3(-1.0f, 1.0f, -1.0f));
 		model = glm::translate(model, glm::vec3(0.0f, -1.0f, 0.0f));
 		model = glm::rotate(model, 30 * toRadians, glm::vec3(0.0f, 1.0f, 0.0f));
 		model = glm::scale(model, glm::vec3(8.0f, 8.0f, 8.0f));
@@ -1200,8 +1488,10 @@ int main()
 		// model = glm::rotate(model, -90 * toRadians, glm::vec3(1.0f, 0.0f, 0.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		constMedioChiquito.RenderModel();
-	
+
 		model = glm::mat4(1.0);
+		model = glm::translate(model, glm::vec3(0.0f, 0.0f, 200.0f));
+		model = glm::scale(model, glm::vec3(-1.0f, 1.0f, -1.0f));
 		model = glm::translate(model, glm::vec3(0.0f, -1.0f, 0.0f));
 		model = glm::rotate(model, 30 * toRadians, glm::vec3(0.0f, 1.0f, 0.0f));
 		model = glm::scale(model, glm::vec3(8.0f, 8.0f, 8.0f));
@@ -1213,36 +1503,34 @@ int main()
 
 
 		model = glm::mat4(1.0);
-		model = glm::translate(model, glm::vec3(100.0f, 0.0f, -150.0f));
-		model = glm::rotate(model, 90 * toRadians, glm::vec3(0.0f, 1.0f, 0.0f));
+		model = glm::translate(model, glm::vec3(100.0f, 0.0f, -200.0f));
+		model = glm::rotate(model, 180 * toRadians, glm::vec3(0.0f, 1.0f, 0.0f));
 		model = glm::scale(model, glm::vec3(8.0f, 8.0f, 8.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-		race.UseTexture();
 		racecourse.RenderModel();
 
 
 		//cofre con keyframe
 		model = glm::mat4(1.0);
-      
+
+		model = glm::scale(model, glm::vec3(-1.0f, 1.0f, -1.0f));
 		model = glm::translate(model, glm::vec3(-50.0f, 0.0f, 140.0f));
 		model = glm::rotate(model, 180 * toRadians, glm::vec3(0.0f, 1.0f, 0.0f));
 		model = glm::scale(model, glm::vec3(5.0f, 5.0f, 5.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-		chest.UseTexture();
 		chest_body.RenderModel();
 		model = glm::translate(model, glm::vec3(0.0f, 1.1f, -0.7f));
-	
+
 		modelaux = model;
-       
+
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-		glUniform3fv(uniformColor, 1, glm::value_ptr(color)); 
+		glUniform3fv(uniformColor, 1, glm::value_ptr(color));
 		sp.render();
-	
+
 		model = modelaux;
 		modelaux = model;
 		model = glm::rotate(model, giroCofre * toRadians, glm::vec3(-1.0f, 0.0f, 0.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-		chest.UseTexture();
 		chest_lid.RenderModel();
 
 		model = modelaux;
@@ -1258,24 +1546,64 @@ int main()
 
 		model = modelaux;
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-		chest.UseTexture();
 		chest_key.RenderModel();
 
+		model = glm::mat4(1.0);
+		model = glm::translate(model, glm::vec3(100.0f, 0.0f, 300.0f));
+		model = glm::scale(model, glm::vec3(8.0f, 8.0f, 8.0f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		ballcourt_M.RenderModel();
 
 		color = glm::vec3(1.0f, 1.0f, 1.0f);
 		glUniform3fv(uniformColor, 1, glm::value_ptr(color));
 
-                for (auto entity : movingEntities) {
-			entity->update(dt);
+		for (auto entity : movingEntities) {
+			if (!firstFrame) {
+				entity->update(dt);
+			}
 			entity->render(uniformModel);
 		}
 
 		avatar->update(dt);
 		avatar->render(uniformModel);
 
+		if (!tux->getAnimating() && mainWindow.getReiniciaTux()) {
+			tux->startAnimation();
+		}
+
+		if (!delfin->getAnimating() && mainWindow.getReiniciaDelfin()) {
+			delfin->restartAnim();
+		}
+
+		if (!condor->getAnimating() && mainWindow.getReiniciaCondor()) {
+			condor->startAnimation();
+			alSourcei(alSource2, AL_LINEAR_DISTANCE, AL_TRUE);
+
+			alSourcePlay(alSource2);
+		}
+
+		if (!suzanne->getAnimating() && mainWindow.getReiniciaSuzanne()) {
+			suzanne->startAnimation();
+
+			alSourcei(alSource2, AL_LINEAR_DISTANCE, AL_TRUE);
+
+			alSourcePlay(alSource2);
+		}
+
+
+		tux->update(dt);
+		tux->render(uniformModel);
+
 		model = glm::mat4(1.0);
-		model = glm::translate(model, glm::vec3(-150.0f, -2.0f, -10.0f));
-		model = glm::rotate(model, glm::radians(270.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		model = model * tux->getModel();
+		model = glm::translate(model, glm::vec3(3.0f, -1.0f, 0.0f));
+		model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		beach_M.RenderModel();
+
+		model = glm::mat4(1.0);
+		model = glm::translate(model, glm::vec3(0.0f, -2.0f, -50.0f));
+		model = glm::rotate(model, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		modelaux = model;
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		color = glm::vec3(1.0f, 1.0f, 1.0f);
@@ -1283,7 +1611,7 @@ int main()
 		Arco_M.RenderModel();
 
 		model = modelaux;
-		model = glm::translate(model, glm::vec3(-1.3f, 0.0f, 0.0));
+		model = glm::translate(model, glm::vec3(-1.39f, 0.0f, 0.0));
 		model = glm::rotate(model, glm::radians(mainWindow.getarticulacion6()), glm::vec3(0.0f, 1.0f, 0.0f));
 		glUniform3fv(uniformColor, 1, glm::value_ptr(color));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
@@ -1296,6 +1624,34 @@ int main()
 		Porticullis_M.RenderModel();
 
 		model = glm::mat4(1.0);
+
+		model = glm::translate(model, glm::vec3(-150.0f, -2.0f, -10.0f));
+		model = glm::rotate(model, glm::radians(270.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		modelaux = model;
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		color = glm::vec3(1.0f, 1.0f, 1.0f);
+
+		glUniform3fv(uniformColor, 1, glm::value_ptr(color));
+		Arco_M.RenderModel();
+
+
+		model = modelaux;
+		model = glm::translate(model, glm::vec3(-1.3f, 0.0f, 0.0));
+		model = glm::rotate(model, glm::radians(mainWindow.getarticulacion6()), glm::vec3(0.0f, 1.0f, 0.0f));
+		glUniform3fv(uniformColor, 1, glm::value_ptr(color));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Puerta_M.RenderModel();
+
+
+
+		model = modelaux;
+		model = glm::translate(model, mainWindow.getDeslizPos());
+		glUniform3fv(uniformColor, 1, glm::value_ptr(color));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Porticullis_M.RenderModel();
+
+
+		model = glm::mat4(1.0);
 		model = glm::translate(model, glm::vec3(0.0f, 0.0f, -150.0f));
 		model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
@@ -1303,11 +1659,11 @@ int main()
 
 		int numpapus = 9;
 		GLfloat angdif = 15.0f;
-                for (int i = 0; i < numpapus; i++) {
+		for (int i = 0; i < numpapus; i++) {
 
 			model = modelaux;
 			model = glm::translate(model, glm::vec3(0.0f, 6.2f, 0.5025f));
-			GLfloat angulo = (angdif * (numpapus/2)) - angdif * i;
+			GLfloat angulo = (angdif * (numpapus / 2)) - angdif * i;
 			angulo += angdif * (glfwGetTime() - lastLetrero) / 0.25 - angdif;
 			model = glm::rotate(model, glm::radians(angulo), glm::vec3(0.0f, 0.0f, 1.0f));
 			model = glm::translate(model, glm::vec3(0.0f, 1.875f, 0.0f));
@@ -1324,10 +1680,8 @@ int main()
 			glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 			letreroTexture.UseTexture();
 			meshList[4]->RenderMesh();
-
-
 		}
-                if (glfwGetTime() - lastLetrero > 0.25f) {
+		if (glfwGetTime() - lastLetrero > 0.25f) {
 			indiceLetrero = (indiceLetrero + 1) % strlen(letreroTexto);
 			lastLetrero = glfwGetTime();
 		}
@@ -1346,7 +1700,8 @@ int main()
 		}
 
 		glm::vec4 dir = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
-		glm::mat4 papu = glm::rotate(glm::mat4(1.0f), (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
+		float ang = (6.28 / 120.0) * hora;
+		glm::mat4 papu = glm::rotate(glm::mat4(1.0f), ang, glm::vec3(0.0f, 0.0f, 1.0f));
 		dir = papu * dir;
 		mainLight.SetDir(dir);
 		//información al shader de fuentes de iluminación
@@ -1354,7 +1709,7 @@ int main()
 		shaderList[0].SetPointLights(pointLights, pointLightCount);
 		shaderList[0].SetSpotLights(spotLights, spotLightCount);
 
-		
+
 		//blending: transparencia o traslucidez
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -1365,7 +1720,29 @@ int main()
 		glUseProgram(0);
 
 		mainWindow.swapBuffers();
+
+		firstFrame = false;
 	}
+
+
+	alDeleteSources(1, &alSource);
+
+	//delete our buffer
+	//alDeleteBuffers(1, &alSampleSet);
+
+	context = alcGetCurrentContext();
+
+	//Get device for active context
+	device = alcGetContextsDevice(context);
+
+	//Disable context
+	alcMakeContextCurrent(NULL);
+
+	//Release context(s)
+	alcDestroyContext(context);
+
+	//Close device
+	alcCloseDevice(device);
 
 	return 0;
 }
@@ -1385,7 +1762,8 @@ void inputKeyframes(bool* keys)
 				printf("\n presiona 0 para habilitar reproducir de nuevo la animaci�n'\n");
 				habilitaranimacion = 0;
 
-			} else {
+			}
+			else {
 				play = false;
 
 			}
@@ -1520,7 +1898,8 @@ void inputKeyframes(bool* keys)
 			interpolation();
 			play = true;
 			playIndex = 0;
-		} else {
+		}
+		else {
 			printf("Archivo leído, pero no hay suficientes frames para animar.\n");
 		}
 	}
