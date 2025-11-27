@@ -16,7 +16,7 @@ Camera::Camera(glm::vec3 startPosition, glm::vec3 startUp, GLfloat startYaw, GLf
         estado = FREE_CAMERA;
 
         cameraRig = CameraRig(position, [](GLfloat t) {
-		return glm::vec3(40.0f * cos(t / 10.0f), 11.0f + 10.0f * sin(t / 3.0f), 40.0f * sin(t / 10.0f));
+		return glm::vec3(150.0f * cos(t / 10.0f), 75.0f + 10.0f * sin(t / 3.0f), 150.0f * sin(t / 10.0f));
 	});
 
 	moveSpeed = startMoveSpeed;

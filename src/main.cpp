@@ -96,6 +96,13 @@ Texture plateado;
 Texture metal;
 Texture chest;
 
+Texture ballcourt1;
+Texture ballcourt2;
+Texture ballcourt3;
+Texture ballcourt4;
+Texture ballcourt5;
+Texture ballcourt6;
+
 Texture letreroTexture;
 
 Texture padock1;
@@ -103,6 +110,9 @@ Texture padock2;
 Texture padock3;
 Texture padockLetter;
 
+Texture cara;
+
+Model ballcourt_M;
 Model Dado_M;
 
 Model Kitt_M;
@@ -694,6 +704,20 @@ int main()
 	padockLetter.LoadTextureA();
 
 
+	ballcourt1 = Texture("Textures/7macaw_Material.003_BaseColor.png");
+	ballcourt1.LoadTextureA();
+	ballcourt2 = Texture("Textures/7macaw_Material.003_Normal.png");
+	ballcourt2.LoadTextureA();
+	ballcourt3 = Texture("Textures/7macaw_Material.003_Roughness.png");
+	ballcourt3.LoadTextureA();
+	ballcourt4 = Texture("Textures/ballourt_Material_BaseColor.png");
+	ballcourt4.LoadTextureA();
+	ballcourt5 = Texture("Textures/ballourt_Material_Normal.png");
+	ballcourt5.LoadTextureA();
+	ballcourt6 = Texture("Textures/ballourt_Material_Roughness.png");
+	ballcourt6.LoadTextureA();
+
+
 	Lampara_M = Model();
 	Lampara_M.LoadModel("Models/posteluz.fbx");
 	Diablo_M = Model();
@@ -852,6 +876,12 @@ int main()
         thunderbirdAla_M = Model();
 	thunderbirdAla_M.LoadModel("Models/thunderbird-ala.obj");
 
+	cara = Texture("Textures/cara.png");
+	cara.LoadTextureA();
+
+	ballcourt_M = Model();
+	ballcourt_M.LoadModel("Models/court.obj");
+
 	std::vector<std::string> skyboxFaces;
 	skyboxFaces.push_back("Textures/Skybox/heather_rt.jpg");
 	skyboxFaces.push_back("Textures/Skybox/heather_lf.jpg");
@@ -874,7 +904,7 @@ int main()
 
 
 	//luz direccional, sólo 1 y siempre debe de existir
-	mainLight = DirectionalLight(1.0f, 1.0f, 1.0f,
+	mainLight = DirectionalLight(1.0f, 0.95f, 0.9f,
 				     0.5f, 0.5f,
 				     0.0f, 0.0f, -1.0f);
 	//contador de luces puntuales
@@ -994,13 +1024,62 @@ int main()
 // Pos: 153.167160 41.381664 -228.169876
 // Dir: -21.500000 71.000000
 
-        movingEntities.push_back(new Beastie(&beastieCarro_M, &beastieCarroLlantaTras_M, &beastieCarroLlantaDel_M, glm::vec3(150.0f, 0.0f, -230.0f), [](GLfloat t) {
-		return glm::vec3(20.0f * cos(t), 0.0f, 50.0f * sin(0.666f * t));
-	}));
+Beastie *beastie = new Beastie(&beastieCarro_M, &beastieCarroLlantaTras_M, &beastieCarroLlantaDel_M, glm::vec3(-28.0f, 2.0f, 0.0f), [](GLfloat t) {
+		// return glm::vec3(20.0f * cos(t), 0.0f, 50.0f * sin(0.666f * t));
 
-	movingEntities.push_back(new Xue(&XueCarro_M, &XuePaleta_M, &XueTurbina_M, glm::vec3(160.0f, 0.0f, -240.0f), [](GLfloat t) {
-		return glm::vec3(40.0f * cos(t), 0.0f, 40.0f * sin(0.666f * t));
-	}));
+                while (t > 4.5 + (3.141592 / 4) + 1 + (3.141592 / 4 + 4.5 + (3.141592 / 4)) + 1 + (3.141592 / 4)) {
+			t -= 4.5 + (3.141592 / 4) + 1 + (3.141592 / 4 + 4.5 + (3.141592 / 4)) + 1 + (3.141592 / 4);
+		}
+
+                if (t < 4.5) {
+			return glm::vec3(16*t, 0.0f, 0.0f);
+                } else if (t < 4.5 + 3.141592 / 4) {
+			return glm::vec3(72.0f + 4 * sin(t - 4.5f), 0.0f, +4.0f - 4* cos(t-4.5f));
+                } else if (t < 4.5 + (3.141592 / 4) + 1) {
+			return glm::vec3(76.0f, 0.0f, 4.0f + 16 * (t - 4.5 - (3.141592 / 4) ) );
+                } else if (t < 4.5 + (3.141592 / 4) + 1 + (3.141592 / 4)) {
+			return glm::vec3(72.0f + 4 * cos(t - 4.5 - (3.141592 / 4) - 1 ), 0.0f, 20.0f + 4 * sin(t-4.5 - (3.141592 / 4) - 1 ));
+                } else if (t < 4.5 + (3.141592 / 4) + 1 + (3.141592 / 4) + 4.5) {
+			return glm::vec3(72 - 16 * (t-(4.5 + (3.141592 / 4) + 1 + (3.141592 / 4) )), 0.0f, 24.0f);
+                } else if (t < 4.5 + (3.141592 / 4) + 1 + (3.141592 / 4 + 4.5 + (3.141592 / 4))) {
+			return glm::vec3(0.0f - 4 * sin(t - (4.5 + (3.141592 / 4) + 1 + (3.141592 / 4 + 4.5))), 0.0f, 20.0f + 4 * cos(t-(4.5 + (3.141592 / 4) + 1 + (3.141592 / 4 + 4.5))));
+                } else if (t < 4.5 + (3.141592 / 4) + 1 + (3.141592 / 4 + 4.5 + (3.141592 / 4)) + 1) {
+			return glm::vec3(-4.0f, 0.0f, 20 - 16 * (t-(4.5 + (3.141592 / 4) + 1 + (3.141592 / 4 + 4.5 + (3.141592 / 4)))));
+                } else if (t < 4.5 + (3.141592 / 4) + 1 + (3.141592 / 4 + 4.5 + (3.141592 / 4)) + 1 + (3.141592 / 4)) {
+			return glm::vec3(0.0f - 4 * cos(t - (4.5 + (3.141592 / 4) + 1 + (3.141592 / 4 + 4.5 + (3.141592 / 4)) + 1)), 0.0f, 4.0f - 4 * sin(t-(4.5 + (3.141592 / 4) + 1 + (3.141592 / 4 + 4.5 + (3.141592 / 4)) + 1)));
+		}
+
+		return glm::vec3(0.0f, 0.0f, 0.0f);
+	});
+        movingEntities.push_back(beastie);
+
+	Beastie *xue = new Beastie(&beastieCarro_M, &beastieCarroLlantaTras_M, &beastieCarroLlantaDel_M, glm::vec3(-28.0f, 2.0f, 0.0f), [](GLfloat t) {
+		t *= 0.90;
+                while (t > 4.5 + (3.141592 / 4) + 1 + (3.141592 / 4 + 4.5 + (3.141592 / 4)) + 1 + (3.141592 / 4)) {
+			t -= 4.5 + (3.141592 / 4) + 1 + (3.141592 / 4 + 4.5 + (3.141592 / 4)) + 1 + (3.141592 / 4);
+		}
+
+                if (t < 4.5) {
+			return glm::vec3(16*t, 0.0f, 0.0f);
+                } else if (t < 4.5 + 3.141592 / 4) {
+			return glm::vec3(72.0f + 4 * sin(t - 4.5f), 0.0f, +4.0f - 4* cos(t-4.5f));
+                } else if (t < 4.5 + (3.141592 / 4) + 1) {
+			return glm::vec3(76.0f, 0.0f, 4.0f + 16 * (t - 4.5 - (3.141592 / 4) ) );
+                } else if (t < 4.5 + (3.141592 / 4) + 1 + (3.141592 / 4)) {
+			return glm::vec3(72.0f + 4 * cos(t - 4.5 - (3.141592 / 4) - 1 ), 0.0f, 20.0f + 4 * sin(t-4.5 - (3.141592 / 4) - 1 ));
+                } else if (t < 4.5 + (3.141592 / 4) + 1 + (3.141592 / 4) + 4.5) {
+			return glm::vec3(72 - 16 * (t-(4.5 + (3.141592 / 4) + 1 + (3.141592 / 4) )), 0.0f, 24.0f);
+                } else if (t < 4.5 + (3.141592 / 4) + 1 + (3.141592 / 4 + 4.5 + (3.141592 / 4))) {
+			return glm::vec3(0.0f - 4 * sin(t - (4.5 + (3.141592 / 4) + 1 + (3.141592 / 4 + 4.5))), 0.0f, 20.0f + 4 * cos(t-(4.5 + (3.141592 / 4) + 1 + (3.141592 / 4 + 4.5))));
+                } else if (t < 4.5 + (3.141592 / 4) + 1 + (3.141592 / 4 + 4.5 + (3.141592 / 4)) + 1) {
+			return glm::vec3(-4.0f, 0.0f, 20 - 16 * (t-(4.5 + (3.141592 / 4) + 1 + (3.141592 / 4 + 4.5 + (3.141592 / 4)))));
+                } else if (t < 4.5 + (3.141592 / 4) + 1 + (3.141592 / 4 + 4.5 + (3.141592 / 4)) + 1 + (3.141592 / 4)) {
+			return glm::vec3(0.0f - 4 * cos(t - (4.5 + (3.141592 / 4) + 1 + (3.141592 / 4 + 4.5 + (3.141592 / 4)) + 1)), 0.0f, 4.0f - 4 * sin(t-(4.5 + (3.141592 / 4) + 1 + (3.141592 / 4 + 4.5 + (3.141592 / 4)) + 1)));
+		}
+
+		return glm::vec3(0.0f, 0.0f, 0.0f);
+	});
+	movingEntities.push_back(xue);
 
         movingEntities.push_back(new Thunderbird(&thunderbirdCuerpo_M, &thunderbirdAla_M, glm::vec3(0.0f), [](GLfloat t) {
 		return glm::vec3(40.0f * cos(t), 75.0f + 20.0f * sin(t), 100.0f * sin(0.666f * t));
@@ -1167,6 +1246,12 @@ int main()
 
 		meshList[2]->RenderMesh();
 
+		model = glm::mat4(1.0);
+		model = glm::translate(model, glm::vec3(100.0f, 0.0f, 300.0f));
+		model = glm::scale(model, glm::vec3(8.0f, 8.0f, 8.0f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		ballcourt_M.RenderModel();
+
 		// Diablo
 		color = glm::vec3(1.0f, 1.0f, 1.0f);
 		model = glm::mat4(1.0);
@@ -1205,6 +1290,7 @@ int main()
 		model = glm::translate(model, glm::vec3(152.0f, -2.0f, 100.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		palmera.RenderModel();
+
 
 
 		for (i = 0; i < 20; i++) {
@@ -1476,12 +1562,15 @@ int main()
 
 
 
+		GLfloat angle = 112.5f;
 		model = glm::mat4(1.0);
-		model = glm::translate(model, glm::vec3(100.0f, 0.0f, -200.0f));
-		model = glm::rotate(model, 180 * toRadians, glm::vec3(0.0f, 1.0f, 0.0f));
-		model = glm::scale(model, glm::vec3(8.0f, 8.0f, 8.0f));
+		model = glm::translate(model, glm::vec3(100.0f, -5.0f + 0.125f, -200.0f));
+		model = glm::rotate(model, angle * toRadians, glm::vec3(0.0f, 1.0f, 0.0f));
+		model = glm::scale(model, glm::vec3(4.0f, 4.0f, 4.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		racecourse.RenderModel();
+		beastie->setBaseModel(model);
+		xue->setBaseModel(model);
 
 
 		//cofre con keyframe

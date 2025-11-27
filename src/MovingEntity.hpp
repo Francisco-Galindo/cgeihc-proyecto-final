@@ -17,17 +17,22 @@ public:
 		pos = glm::vec3(0.0f);
 		oldpos = glm::vec3(0.0f);
 		oldoldpos = glm::vec3(0.0f);
+		baseModel = glm::mat4(1.0f);
+		angle = 0;
 	}
 	MovingEntity(glm::vec3 orig, std::function<glm::vec3(GLfloat)> callback);
 	glm::vec3 getPos() { return pos; }
 	glm::vec3 getDiff() { return diff; }
 	void update(GLfloat dt);
+	void setBaseModel(glm::mat4 mat);
+	void setAngle(GLfloat ang);
 	virtual void updateAnimation(GLfloat dt) { return; };
 	virtual void render(GLint uniformModel) = 0;
 
 	// ~MovingEntity() = default;
 protected:
 	glm::vec3 pos, oldpos, oldoldpos, diff, oldDiff, diff2, orig;
-	GLfloat t, vel;
+	glm::mat4 baseModel;
+	GLfloat t, vel, angle;
 	std::function<glm::vec3(GLfloat)> curveCallBack;
 }; 
